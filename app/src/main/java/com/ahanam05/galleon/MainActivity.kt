@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
             GalleonTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
+                        name = "Ahana",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
