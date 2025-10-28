@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "566840063026",
+    "project_id": "galleon-476417",
+    "storage_bucket": "galleon-476417.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:566840063026:android:52dcb4ad43228fc805b82b",
+        "android_client_info": {
+          "package_name": "com.ahanam05.galleon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "566840063026-ch0pf0vkkuit668q07uhahr54ck83srn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ahanam05.galleon",
+            "certificate_hash": "e0f53b67865d8fb619eafdb8a7f736fe8cafc33e"
+          }
+        },
+        {
+          "client_id": "566840063026-6j5mep165kmru5oar9q29e6dh2gh3dbq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfyom9lLa5aDuxh46jj_BUuvQghIlW9z4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "566840063026-6j5mep165kmru5oar9q29e6dh2gh3dbq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
