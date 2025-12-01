@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "566840063026-ccqnq3rj1n79i49lps7d47qa94kk3jte.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ahanam05.galleon",
+            "certificate_hash": "23055d6648e4b5bc826d4708a6a7f38610e3b6aa"
+          }
+        },
+        {
           "client_id": "566840063026-ch0pf0vkkuit668q07uhahr54ck83srn.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
