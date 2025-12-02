@@ -4,4 +4,6 @@
     <string name="sign_in_button_desc">Sign in with Google button</string>
     <string name="galleon_logo_desc">Galleon Logo</string>
     <string name="landing_screen_tagline">Expense tracking\nmade magical</string>
+    <string name="my_expenses_text">My Expenses</string>
+    <string name="settings_desc">Settings</string>
 </resources>

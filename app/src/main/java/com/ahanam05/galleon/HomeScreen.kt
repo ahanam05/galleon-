@@ -1,0 +1,303 @@
+package com.ahanam05.galleon
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+data class ExpenseItem(
+    val title: String,
+    val category: String,
+    val time: String,
+    val amount: String,
+    val categoryTag: String? = null,
+    val categoryColor: Color = Color(0xFFF7E8CA)
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreen() {
+    val expenses = remember {
+        listOf(
+            ExpenseItem("Coffee", "Food", "8:30 AM", "$5.50", "Category"),
+            ExpenseItem("Groceries", "Food", "9:15 AM", "$45.80", "Shopping"),
+            ExpenseItem("Bus Fare", "Transportation", "6:00 PM", "$2.75", "Transport"),
+            ExpenseItem("Dinner", "Food", "7:45 AM", "$32.00", "Transport"),
+            ExpenseItem("Snacks", "Food", "11:00 AM", "$4.20", "Category"),
+            ExpenseItem("Movie Ticket", "Entertainment", "3:00 PM", "$12.00", "Leisure"),
+            ExpenseItem("Taxi", "Transportation", "10:00 PM", "$18.60", "Transport")
+        )
+    }
+
+    var selectedTab by remember { mutableStateOf("Daily") }
+
+    Scaffold(
+        containerColor = Color(0xFFF5F1E5),
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { /* Add expense */ },
+                containerColor = Color(0xFFE0B663),
+                shape = CircleShape,
+                modifier = Modifier
+                    .size(70.dp)
+                    .shadow(12.dp, CircleShape)
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Add",
+                    tint = Color(0xFF2D2D2D),
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            TopBar()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TimePeriodTabs(
+                selectedTab = selectedTab,
+                onTabSelected = { selectedTab = it }
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            DateNavigationRow()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(expenses) { expense ->
+                    ExpenseCard(expense)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TopBar() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(Color(0xFFE0B663), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "U",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2D2D2D)
+            )
+        }
+
+        Text(
+            text = stringResource(id = R.string.my_expenses_text),
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF2D2D2D)
+        )
+
+        IconButton(onClick = { /* Settings icon */ }) {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = stringResource(id = R.string.settings_desc),
+                tint = Color(0xFF666666)
+            )
+        }
+    }
+}
+
+@Composable
+fun TimePeriodTabs(
+    selectedTab: String,
+    onTabSelected: (String) -> Unit
+) {
+    val tabs = listOf("Daily", "Weekly", "Monthly")
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        tabs.forEach { tab ->
+            val selected = tab == selectedTab
+
+            Surface(
+                color = if (selected) Color(0xFFE0B663) else Color.White,
+                shadowElevation = 6.dp,
+                shape = RoundedCornerShape(22.dp),
+                modifier = Modifier
+                    .height(40.dp)
+                    .weight(1f)
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { onTabSelected(tab) }
+                ) {
+                    Text(
+                        text = tab,
+                        color = if (selected) Color.Black else Color(0xFF777777),
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+        }
+    }
+
+}
+
+@Composable
+fun DateNavigationRow() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Wednesday, July 31",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color(0xFF2D2D2D)
+        )
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            IconButton(onClick = { /* Navigate to date */ }) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Next",
+                    tint = Color(0xFF666666)
+                )
+            }
+            IconButton(onClick = { /* Open calendar */ }) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Calendar",
+                    tint = Color(0xFF666666),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpenseCard(expense: ExpenseItem) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = Color.Black.copy(alpha = 0.08f)
+            ),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F7EA))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(5.dp)
+                    .height(60.dp)
+                    .background(Color(0xFFE0B663), RoundedCornerShape(2.dp))
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = expense.title,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2D2D2D)
+                )
+                Text(
+                    text = expense.category,
+                    fontSize = 13.sp,
+                    color = Color(0xFF999999)
+                )
+                Text(
+                    text = expense.time,
+                    fontSize = 11.sp,
+                    color = Color(0xFFCCCCCC)
+                )
+            }
+
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                expense.categoryTag?.let { tag ->
+                    Surface(
+                        color = expense.categoryColor,
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = tag,
+                            fontSize = 10.sp,
+                            color = Color(0xFF999999),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Text(
+                    text = expense.amount,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2D2D2D)
+                )
+            }
+        }
+    }
+}
