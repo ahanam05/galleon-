@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">galleon</string>
+    <string name="app_name">Galleon</string>
+    <string name="sign_in_text">Already have an account? Sign in with Google</string>
+    <string name="sign_in_button_desc">Sign in with Google button</string>
+    <string name="galleon_logo_desc">Galleon Logo</string>
+    <string name="landing_screen_tagline">Expense tracking\nmade magical</string>
 </resources>

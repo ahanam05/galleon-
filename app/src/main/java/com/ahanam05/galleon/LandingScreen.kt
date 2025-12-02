@@ -14,10 +14,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ahanam05.galleon.R.*
 
 @Composable
 fun LandingScreen(onSignInClick: () -> Unit) {
@@ -29,8 +31,8 @@ fun LandingScreen(onSignInClick: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.galleon_logo),
-            contentDescription = "Galleon Logo",
+            painter = painterResource(id = drawable.galleon_logo),
+            contentDescription = stringResource(id = string.galleon_logo_desc),
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .size(160.dp)
@@ -43,7 +45,7 @@ fun LandingScreen(onSignInClick: () -> Unit) {
         )
 
         Text(
-            text = "Galleon",
+            text = stringResource(id = string.app_name),
             fontSize = 40.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF2D2D2D),
@@ -51,7 +53,7 @@ fun LandingScreen(onSignInClick: () -> Unit) {
         )
 
         Text(
-            text = "Expense tracking\nmade magical",
+            text = stringResource(id = string.landing_screen_tagline),
             fontSize = 18.sp,
             color = Color(0xFF666666),
             textAlign = TextAlign.Center,
@@ -79,8 +81,8 @@ fun LandingScreen(onSignInClick: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.siwg_button),
-                    contentDescription = "Sign in with Google button",
+                    painter = painterResource(id = drawable.siwg_button),
+                    contentDescription = stringResource(id = string.sign_in_button_desc),
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .fillMaxHeight()
@@ -92,7 +94,7 @@ fun LandingScreen(onSignInClick: () -> Unit) {
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "Already have account? Sign in with Google",
+            text = stringResource(id = string.sign_in_text),
             fontSize = 13.sp,
             color = Color(0xFF999999),
             textAlign = TextAlign.Center
