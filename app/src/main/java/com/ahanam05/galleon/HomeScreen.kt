@@ -8,19 +8,25 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.launch
 
 data class ExpenseItem(
     val title: String,
@@ -47,55 +53,85 @@ fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
     }
 
     var selectedTab by remember { mutableStateOf("Daily") }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-    Scaffold(
-        containerColor = Color(0xFFF5F1E5),
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { /* Add expense */ },
-                containerColor = Color(0xFFE0B663),
-                shape = CircleShape,
-                modifier = Modifier
-                    .size(70.dp)
-                    .shadow(12.dp, CircleShape)
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = "Add",
-                    tint = Color(0xFF2D2D2D),
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            TopBar()
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TimePeriodTabs(
-                selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it }
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            NavigationDrawerContent(
+                user = user,
+                onSignOutClick = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                    onSignOutClick()
+                }
             )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            DateNavigationRow()
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyColumn(
+        },
+        gesturesEnabled = true
+    ) {
+        Scaffold(
+            containerColor = Color(0xFFF5F1E5),
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { /* Add expense */ },
+                    containerColor = Color(0xFFE0B663),
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .size(70.dp)
+                        .shadow(12.dp, CircleShape)
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "Add",
+                        tint = Color(0xFF2D2D2D),
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
+        ) { paddingValues ->
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(paddingValues)
             ) {
-                items(expenses) { expense ->
-                    ExpenseCard(expense)
+                TopBar(
+                    user = user,
+                    onProfileClick = {
+                        scope.launch {
+                            drawerState.open()
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Welcome message
+                WelcomeSection(userName = user?.displayName ?: "User")
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                TimePeriodTabs(
+                    selectedTab = selectedTab,
+                    onTabSelected = { selectedTab = it }
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                DateNavigationRow()
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(expenses) { expense ->
+                        ExpenseCard(expense)
+                    }
                 }
             }
         }
@@ -103,7 +139,121 @@ fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
 }
 
 @Composable
-fun TopBar() {
+fun NavigationDrawerContent(
+    user: FirebaseUser?,
+    onSignOutClick: () -> Unit
+) {
+    ModalDrawerSheet(
+        drawerContainerColor = Color(0xFFFFF8E7),
+        modifier = Modifier.width(280.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (user?.photoUrl != null) {
+                    AsyncImage(
+                        model = user.photoUrl,
+                        contentDescription = stringResource(id = R.string.profile_img_desc),
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFE0B663)),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .background(Color(0xFFE0B663), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = user?.displayName?.firstOrNull()?.uppercaseChar()?.toString() ?: stringResource(id = R.string.profile_img_placeholder),
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2D2D2D)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = user?.displayName ?: "User",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2D2D2D)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            HorizontalDivider(
+                Modifier,
+                DividerDefaults.Thickness,
+                color = Color(0xFFE0B663).copy(alpha = 0.3f)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            NavigationDrawerItem(
+                icon = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = stringResource(id = R.string.sign_out_text),
+                        tint = Color(0xFF2D2D2D)
+                    )
+                },
+                label = {
+                    Text(
+                        text = stringResource(id = R.string.sign_out_text),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF2D2D2D)
+                    )
+                },
+                selected = false,
+                onClick = onSignOutClick,
+                colors = NavigationDrawerItemDefaults.colors(
+                    unselectedContainerColor = Color.Transparent
+                )
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Text(
+                text = stringResource(id = R.string.galleon_version_text),
+                fontSize = 12.sp,
+                color = Color(0xFF999999),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottom = 16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun WelcomeSection(userName: String) {
+    Text(
+        text = "Welcome, $userName",
+        fontSize = 24.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = Color(0xFF2D2D2D),
+        modifier = Modifier.padding(horizontal = 16.dp)
+    )
+}
+
+@Composable
+fun TopBar(user: FirebaseUser?, onProfileClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -114,15 +264,33 @@ fun TopBar() {
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .background(Color(0xFFE0B663), CircleShape),
-            contentAlignment = Alignment.Center
+                .clickable { onProfileClick() }
         ) {
-            Text(
-                text = "U",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF2D2D2D)
-            )
+            if (user?.photoUrl != null) {
+                AsyncImage(
+                    model = user.photoUrl,
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape)
+                        .background(Color(0xFFE0B663)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFFE0B663), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = user?.displayName?.firstOrNull()?.uppercaseChar()?.toString() ?: "U",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2D2D2D)
+                    )
+                }
+            }
         }
 
         Text(

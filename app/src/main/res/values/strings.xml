@@ -6,4 +6,8 @@
     <string name="landing_screen_tagline">Expense tracking\nmade magical</string>
     <string name="my_expenses_text">My Expenses</string>
     <string name="settings_desc">Settings</string>
+    <string name="sign_out_text">Sign Out</string>
+    <string name="galleon_version_text">Galleon v1.0</string>
+    <string name="profile_img_placeholder">U</string>
+    <string name="profile_img_desc">Profile Picture</string>
 </resources>

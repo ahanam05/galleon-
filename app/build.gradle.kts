@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.play.services.auth)
     implementation(platform(libs.firebase.bom))
     implementation("com.firebaseui:firebase-ui-auth:9.0.0")
+    implementation(libs.coil.compose)
     implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
