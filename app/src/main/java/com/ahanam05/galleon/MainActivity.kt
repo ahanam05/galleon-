@@ -6,6 +6,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.credentials.ClearCredentialStateRequest
@@ -16,6 +22,10 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.ClearCredentialException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.ahanam05.galleon.ui.theme.GalleonTheme
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -31,7 +41,6 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var credentialManager: CredentialManager
-    val webClientId = "566840063026-6j5mep165kmru5oar9q29e6dh2gh3dbq.apps.googleusercontent.com"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,25 +49,22 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             GalleonTheme {
+                val startDestination = if (auth.currentUser != null) HOME_SCREEN else LANDING_SCREEN
                 Surface(
                     modifier = Modifier.fillMaxSize(), color =  Color(0xFFFFF8E7) ,
                 ) {
-                    LandingScreen(onSignInClick = { launchCredentialManager() })
+                    NavigationHandler(auth = auth,
+                        startDestination = startDestination,
+                        onSignInClick = { launchCredentialManager() },
+                        onSignOutClick = { navController -> signOut(navController) })
                 }
             }
         }
-
-    }
-
-    override fun onStart() {
-        super.onStart()
-        val currentUser = auth.currentUser
-        updateUI(currentUser)
     }
 
     private fun launchCredentialManager() {
         val googleIdOption = GetGoogleIdOption.Builder()
-            .setServerClientId(webClientId)
+            .setServerClientId(WEB_CLIENT_ID)
             //.setNonce(generateSecureRandomNonce())
             .setFilterByAuthorizedAccounts(false)
             .build()
@@ -97,8 +103,7 @@ class MainActivity : ComponentActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     Log.d(TAG, "signInWithCredential:success")
-                    val user = auth.currentUser
-                    updateUI(user)
+                    updateUI(auth.currentUser)
                 } else {
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
                     updateUI(null)
@@ -112,14 +117,14 @@ class MainActivity : ComponentActivity() {
 //    return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes)
 //}
 
-    private fun signOut() {
+    private fun signOut(navController: NavController) {
         auth.signOut()
 
         lifecycleScope.launch {
             try {
                 val clearRequest = ClearCredentialStateRequest()
                 credentialManager.clearCredentialState(clearRequest)
-                updateUI(null)
+                //updateUI(null)
             } catch (e: ClearCredentialException) {
                 Log.e(TAG, "Couldn't clear user credentials: ${e.localizedMessage}")
             }
@@ -128,7 +133,7 @@ class MainActivity : ComponentActivity() {
 
     private fun updateUI(user: FirebaseUser?) {
         if (user != null) {
-            Log.d(TAG, "User $user is signed in")
+            Log.d(TAG, "User ${user.email} is signed in")
         } else {
             Log.d(TAG, "User is signed out")
         }
@@ -136,5 +141,50 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         private const val TAG = "GoogleActivity"
+        private const val WEB_CLIENT_ID = "566840063026-6j5mep165kmru5oar9q29e6dh2gh3dbq.apps.googleusercontent.com"
+        private const val HOME_SCREEN = "home"
+        private const val LANDING_SCREEN = "landing"
+    }
+
+    @Composable
+    fun NavigationHandler(
+        auth: FirebaseAuth,
+        startDestination: String,
+        onSignInClick: () -> Unit,
+        onSignOutClick: (NavController) -> Unit
+    ){
+        val navController = rememberNavController()
+        var currentUser by remember { mutableStateOf(auth.currentUser) }
+
+        DisposableEffect(auth) {
+            val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+                val user = firebaseAuth.currentUser
+                currentUser = user
+                if (user != null) {
+                    navController.navigate(HOME_SCREEN) { popUpTo(0) }
+                } else {
+                    navController.navigate(LANDING_SCREEN) { popUpTo(0) }
+                }
+            }
+            auth.addAuthStateListener(listener)
+
+            onDispose {
+                auth.removeAuthStateListener(listener)
+            }
+        }
+
+        NavHost(navController = navController, startDestination = startDestination){
+            composable(LANDING_SCREEN){
+                LandingScreen(onSignInClick = onSignInClick)
+            }
+            composable(HOME_SCREEN){
+                val user = currentUser
+                if (user != null){
+                    HomeScreen(user = user, onSignOutClick = { onSignOutClick(navController) })
+                }
+
+            }
+        }
+
     }
 }

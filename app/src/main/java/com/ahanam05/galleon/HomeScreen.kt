@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseUser
 
 data class ExpenseItem(
     val title: String,
@@ -32,7 +33,7 @@ data class ExpenseItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
     val expenses = remember {
         listOf(
             ExpenseItem("Coffee", "Food", "8:30 AM", "$5.50", "Category"),
