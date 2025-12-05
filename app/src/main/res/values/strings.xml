@@ -10,4 +10,7 @@
     <string name="galleon_version_text">Galleon v1.0</string>
     <string name="profile_img_placeholder">U</string>
     <string name="profile_img_desc">Profile Picture</string>
+    <string name="calendar_icon_desc">Calendar</string>
+    <string name="next_date_desc">Next date</string>
+    <string name="previous_date_desc">Previous date</string>
 </resources>

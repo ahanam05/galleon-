@@ -9,8 +9,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
@@ -31,7 +34,6 @@ import kotlinx.coroutines.launch
 data class ExpenseItem(
     val title: String,
     val category: String,
-    val time: String,
     val amount: String,
     val categoryTag: String? = null,
     val categoryColor: Color = Color(0xFFF7E8CA)
@@ -42,13 +44,13 @@ data class ExpenseItem(
 fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
     val expenses = remember {
         listOf(
-            ExpenseItem("Coffee", "Food", "8:30 AM", "$5.50", "Category"),
-            ExpenseItem("Groceries", "Food", "9:15 AM", "$45.80", "Shopping"),
-            ExpenseItem("Bus Fare", "Transportation", "6:00 PM", "$2.75", "Transport"),
-            ExpenseItem("Dinner", "Food", "7:45 AM", "$32.00", "Transport"),
-            ExpenseItem("Snacks", "Food", "11:00 AM", "$4.20", "Category"),
-            ExpenseItem("Movie Ticket", "Entertainment", "3:00 PM", "$12.00", "Leisure"),
-            ExpenseItem("Taxi", "Transportation", "10:00 PM", "$18.60", "Transport")
+            ExpenseItem("Coffee", "Food", "$5.50", "Category"),
+            ExpenseItem("Groceries", "Food",  "$45.80", "Shopping"),
+            ExpenseItem("Bus Fare", "Transportation",  "$2.75", "Transport"),
+            ExpenseItem("Dinner", "Food",  "$32.00", "Transport"),
+            ExpenseItem("Snacks", "Food", "$4.20", "Category"),
+            ExpenseItem("Movie Ticket", "Entertainment",  "$12.00", "Leisure"),
+            ExpenseItem("Taxi", "Transportation",  "$18.60", "Transport")
         )
     }
 
@@ -79,14 +81,14 @@ fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
                     containerColor = Color(0xFFE0B663),
                     shape = CircleShape,
                     modifier = Modifier
-                        .size(70.dp)
+                        .size(60.dp)
                         .shadow(12.dp, CircleShape)
                 ) {
                     Icon(
                         Icons.Default.Add,
                         contentDescription = "Add",
                         tint = Color(0xFF2D2D2D),
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -107,7 +109,6 @@ fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Welcome message
                 WelcomeSection(userName = user?.displayName ?: "User")
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -144,8 +145,8 @@ fun NavigationDrawerContent(
     onSignOutClick: () -> Unit
 ) {
     ModalDrawerSheet(
-        drawerContainerColor = Color(0xFFFFF8E7),
-        modifier = Modifier.width(280.dp)
+        drawerContainerColor = Color(0xFFFFF5DD),
+        modifier = Modifier.width(250.dp)
     ) {
         Column(
             modifier = Modifier
@@ -163,7 +164,7 @@ fun NavigationDrawerContent(
                         model = user.photoUrl,
                         contentDescription = stringResource(id = R.string.profile_img_desc),
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(60.dp)
                             .clip(CircleShape)
                             .background(Color(0xFFE0B663)),
                         contentScale = ContentScale.Crop
@@ -227,6 +228,29 @@ fun NavigationDrawerContent(
                 )
             )
 
+            NavigationDrawerItem(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = stringResource(id = R.string.settings_desc),
+                        tint = Color(0xFF2D2D2D)
+                    )
+                },
+                label = {
+                    Text(
+                        text = stringResource(id = R.string.settings_desc),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF2D2D2D)
+                    )
+                },
+                selected = false,
+                onClick = { /* Navigate to settings */},
+                colors = NavigationDrawerItemDefaults.colors(
+                    unselectedContainerColor = Color.Transparent
+                )
+            )
+
             Spacer(modifier = Modifier.weight(1f))
 
             Text(
@@ -245,7 +269,7 @@ fun NavigationDrawerContent(
 fun WelcomeSection(userName: String) {
     Text(
         text = "Welcome, $userName",
-        fontSize = 24.sp,
+        fontSize = 22.sp,
         fontWeight = FontWeight.SemiBold,
         color = Color(0xFF2D2D2D),
         modifier = Modifier.padding(horizontal = 16.dp)
@@ -257,8 +281,8 @@ fun TopBar(user: FirebaseUser?, onProfileClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 8.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(start = 15.dp, end = 15.dp, top = 13.dp, bottom = 10.dp),
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -269,7 +293,7 @@ fun TopBar(user: FirebaseUser?, onProfileClick: () -> Unit) {
             if (user?.photoUrl != null) {
                 AsyncImage(
                     model = user.photoUrl,
-                    contentDescription = "Profile Picture",
+                    contentDescription = stringResource(id = R.string.profile_img_desc),
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(CircleShape)
@@ -293,20 +317,14 @@ fun TopBar(user: FirebaseUser?, onProfileClick: () -> Unit) {
             }
         }
 
+        Spacer(modifier = Modifier.width(12.dp))
+
         Text(
             text = stringResource(id = R.string.my_expenses_text),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF2D2D2D)
+            color = Color(0xFF2D2D2D),
         )
-
-        IconButton(onClick = { /* Settings icon */ }) {
-            Icon(
-                imageVector = Icons.Default.Settings,
-                contentDescription = stringResource(id = R.string.settings_desc),
-                tint = Color(0xFF666666)
-            )
-        }
     }
 }
 
@@ -320,8 +338,8 @@ fun TimePeriodTabs(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(horizontal = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(3.dp)
     ) {
         tabs.forEach { tab ->
             val selected = tab == selectedTab
@@ -358,35 +376,39 @@ fun DateNavigationRow() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 30.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        IconButton(onClick = { /* Navigate to previous date */ }) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                contentDescription = stringResource(id = R.string.previous_date_desc),
+                tint = Color(0xFF666666)
+            )
+        }
+
         Text(
             text = "Wednesday, July 31",
-            fontSize = 20.sp,
+            fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFF2D2D2D)
         )
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            IconButton(onClick = { /* Navigate to date */ }) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Next",
-                    tint = Color(0xFF666666)
-                )
-            }
-            IconButton(onClick = { /* Open calendar */ }) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Calendar",
-                    tint = Color(0xFF666666),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+        IconButton(onClick = { /* Navigate to next date */ }) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = stringResource(id = R.string.next_date_desc),
+                tint = Color(0xFF666666)
+            )
+        }
+        IconButton(onClick = { /* Open calendar */ }) {
+            Icon(
+                imageVector = Icons.Default.DateRange,
+                contentDescription = stringResource(id = R.string.calendar_icon_desc),
+                tint = Color(0xFF666666),
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
@@ -397,7 +419,7 @@ fun ExpenseCard(expense: ExpenseItem) {
         modifier = Modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 8.dp,
+                elevation = 4.dp,
                 shape = RoundedCornerShape(20.dp),
                 ambientColor = Color.Black.copy(alpha = 0.08f)
             ),
@@ -412,7 +434,7 @@ fun ExpenseCard(expense: ExpenseItem) {
             Box(
                 modifier = Modifier
                     .width(5.dp)
-                    .height(60.dp)
+                    .height(48.dp)
                     .background(Color(0xFFE0B663), RoundedCornerShape(2.dp))
             )
 
@@ -424,7 +446,7 @@ fun ExpenseCard(expense: ExpenseItem) {
             ) {
                 Text(
                     text = expense.title,
-                    fontSize = 18.sp,
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF2D2D2D)
                 )
@@ -432,11 +454,6 @@ fun ExpenseCard(expense: ExpenseItem) {
                     text = expense.category,
                     fontSize = 13.sp,
                     color = Color(0xFF999999)
-                )
-                Text(
-                    text = expense.time,
-                    fontSize = 11.sp,
-                    color = Color(0xFFCCCCCC)
                 )
             }
 
@@ -447,13 +464,13 @@ fun ExpenseCard(expense: ExpenseItem) {
                 expense.categoryTag?.let { tag ->
                     Surface(
                         color = expense.categoryColor,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(18.dp)
                     ) {
                         Text(
                             text = tag,
                             fontSize = 10.sp,
-                            color = Color(0xFF999999),
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                            color = Color(0xFF6B6B6B),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
                         )
                     }
                 }
@@ -462,7 +479,7 @@ fun ExpenseCard(expense: ExpenseItem) {
 
                 Text(
                     text = expense.amount,
-                    fontSize = 22.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF2D2D2D)
                 )
