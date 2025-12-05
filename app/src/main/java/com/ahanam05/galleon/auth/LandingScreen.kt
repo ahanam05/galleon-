@@ -1,4 +1,4 @@
-package com.ahanam05.galleon
+package com.ahanam05.galleon.auth
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable

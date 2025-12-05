@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.ahanam05.galleon.auth.LandingScreen
 import com.ahanam05.galleon.ui.theme.GalleonTheme
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -36,6 +37,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 import com.google.firebase.Firebase
 import kotlinx.coroutines.launch
+import com.ahanam05.galleon.home.HomeScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -124,7 +126,6 @@ class MainActivity : ComponentActivity() {
             try {
                 val clearRequest = ClearCredentialStateRequest()
                 credentialManager.clearCredentialState(clearRequest)
-                //updateUI(null)
             } catch (e: ClearCredentialException) {
                 Log.e(TAG, "Couldn't clear user credentials: ${e.localizedMessage}")
             }
@@ -182,9 +183,7 @@ class MainActivity : ComponentActivity() {
                 if (user != null){
                     HomeScreen(user = user, onSignOutClick = { onSignOutClick(navController) })
                 }
-
             }
         }
-
     }
 }
