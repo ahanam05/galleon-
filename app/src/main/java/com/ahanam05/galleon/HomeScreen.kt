@@ -1,5 +1,6 @@
 package com.ahanam05.galleon
 
+import java.util.Calendar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,6 +18,8 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,28 +38,68 @@ data class ExpenseItem(
     val title: String,
     val category: String,
     val amount: String,
+    val date: Long,
     val categoryTag: String? = null,
     val categoryColor: Color = Color(0xFFF7E8CA)
 )
 
+private object Modes{
+    val DAILY = "daily"
+    val WEEKLY = "weekly"
+    val MONTHLY = "monthly"
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
     val expenses = remember {
+        val today = Calendar.getInstance().timeInMillis
+        val yesterday = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }.timeInMillis
+        val tomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, +1) }.timeInMillis
         listOf(
-            ExpenseItem("Coffee", "Food", "$5.50", "Category"),
-            ExpenseItem("Groceries", "Food",  "$45.80", "Shopping"),
-            ExpenseItem("Bus Fare", "Transportation",  "$2.75", "Transport"),
-            ExpenseItem("Dinner", "Food",  "$32.00", "Transport"),
-            ExpenseItem("Snacks", "Food", "$4.20", "Category"),
-            ExpenseItem("Movie Ticket", "Entertainment",  "$12.00", "Leisure"),
-            ExpenseItem("Taxi", "Transportation",  "$18.60", "Transport")
+            ExpenseItem("Coffee", "Food", "$5.50", today,"Category"),
+            ExpenseItem("Groceries", "Food",  "$45.80", yesterday,"Shopping"),
+            ExpenseItem("Bus Fare", "Transportation",  "$2.75", tomorrow, "Transport"),
+            ExpenseItem("Dinner", "Food",  "$32.00", today,"Transport"),
+            ExpenseItem("Snacks", "Food", "$4.20", yesterday,"Category"),
+            ExpenseItem("Movie Ticket", "Entertainment",  "$12.00", today,"Leisure"),
+            ExpenseItem("Taxi", "Transportation",  "$18.60", today,"Transport")
         )
     }
 
-    var selectedTab by remember { mutableStateOf("Daily") }
+    var selectedTab by remember { mutableStateOf(Modes.DAILY) }
+    var selectedDate by remember { mutableLongStateOf(Calendar.getInstance().timeInMillis) }
+    var showDatePicker by  remember { mutableStateOf(false)}
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    if(showDatePicker){
+        DatePickerModal(
+            onDateSelected = { date ->
+                if (date != null) {
+                    selectedDate = date
+                }
+                showDatePicker = false
+            },
+            onDismiss = {
+                showDatePicker = false
+            }
+        )
+    }
+
+    val incrementDate: () -> Unit = {
+        val calendar = Calendar.getInstance().apply { timeInMillis = selectedDate }
+        calendar.add(Calendar.DAY_OF_YEAR, 1)
+        selectedDate = calendar.timeInMillis
+    }
+
+    val decrementDate: () -> Unit = {
+        val calendar = Calendar.getInstance().apply { timeInMillis = selectedDate }
+        calendar.add(Calendar.DAY_OF_YEAR, -1)
+        selectedDate = calendar.timeInMillis
+    }
+
+    val filteredExpenses = expenses.filter { isSameDay(it.date, selectedDate) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -120,7 +163,12 @@ fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                DateNavigationRow()
+                DateNavigationRow(
+                    selectedDate = selectedDate,
+                    onPreviousDate = decrementDate,
+                    onNextDate = incrementDate,
+                    onShowDatePicker = { showDatePicker = true }
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -130,7 +178,7 @@ fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(expenses) { expense ->
+                    items(filteredExpenses) { expense ->
                         ExpenseCard(expense)
                     }
                 }
@@ -333,7 +381,7 @@ fun TimePeriodTabs(
     selectedTab: String,
     onTabSelected: (String) -> Unit
 ) {
-    val tabs = listOf("Daily", "Weekly", "Monthly")
+    val tabs = listOf(Modes.DAILY, Modes.WEEKLY, Modes.MONTHLY)
 
     Row(
         modifier = Modifier
@@ -372,7 +420,12 @@ fun TimePeriodTabs(
 }
 
 @Composable
-fun DateNavigationRow() {
+fun DateNavigationRow(
+    selectedDate: Long,
+    onPreviousDate: () -> Unit,
+    onNextDate: () -> Unit,
+    onShowDatePicker: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -380,7 +433,7 @@ fun DateNavigationRow() {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { /* Navigate to previous date */ }) {
+        IconButton(onClick = onPreviousDate) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                 contentDescription = stringResource(id = R.string.previous_date_desc),
@@ -389,20 +442,20 @@ fun DateNavigationRow() {
         }
 
         Text(
-            text = "Wednesday, July 31",
+            text = formatDate(selectedDate),
             fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFF2D2D2D)
         )
 
-        IconButton(onClick = { /* Navigate to next date */ }) {
+        IconButton(onClick = onNextDate) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = stringResource(id = R.string.next_date_desc),
                 tint = Color(0xFF666666)
             )
         }
-        IconButton(onClick = { /* Open calendar */ }) {
+        IconButton(onClick =  onShowDatePicker) {
             Icon(
                 imageVector = Icons.Default.DateRange,
                 contentDescription = stringResource(id = R.string.calendar_icon_desc),
@@ -410,6 +463,33 @@ fun DateNavigationRow() {
                 modifier = Modifier.size(20.dp)
             )
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerModal(
+    onDateSelected: (Long?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState()
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                onDateSelected(datePickerState.selectedDateMillis)
+            }) {
+                Text(stringResource(id = R.string.ok_text))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(id = R.string.cancel_text))
+            }
+        }
+    ) {
+        DatePicker(state = datePickerState)
     }
 }
 

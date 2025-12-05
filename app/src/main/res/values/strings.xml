@@ -13,4 +13,6 @@
     <string name="calendar_icon_desc">Calendar</string>
     <string name="next_date_desc">Next date</string>
     <string name="previous_date_desc">Previous date</string>
+    <string name="cancel_text">Cancel</string>
+    <string name="ok_text">OK</string>
 </resources>
