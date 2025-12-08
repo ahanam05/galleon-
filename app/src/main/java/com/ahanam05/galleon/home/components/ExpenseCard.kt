@@ -20,9 +20,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ahanam05.galleon.R
 import com.ahanam05.galleon.home.ExpenseItem
 
 @Composable
@@ -73,13 +75,13 @@ fun ExpenseCard(expense: ExpenseItem) {
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                expense.categoryTag?.let { tag ->
+                expense.category.let { category ->
                     Surface(
                         color = expense.categoryColor,
                         shape = RoundedCornerShape(18.dp)
                     ) {
                         Text(
-                            text = tag,
+                            text = category,
                             fontSize = 10.sp,
                             color = Color(0xFF6B6B6B),
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
@@ -90,7 +92,7 @@ fun ExpenseCard(expense: ExpenseItem) {
                 Spacer(modifier = Modifier.weight(1f))
 
                 Text(
-                    text = expense.amount,
+                    text = "${stringResource(id = R.string.rupee_symbol)}${expense.amount}",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF2D2D2D)

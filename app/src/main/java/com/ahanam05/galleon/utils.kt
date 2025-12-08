@@ -2,6 +2,7 @@ package com.ahanam05.galleon
 
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
+import com.ahanam05.galleon.home.ExpenseItem
 import java.util.Locale
 
 fun isSameDay(millis1: Long, millis2: Long): Boolean {
@@ -14,4 +15,12 @@ fun isSameDay(millis1: Long, millis2: Long): Boolean {
 fun formatDate(milliseconds: Long): String {
     val formatter = SimpleDateFormat("EEEE, MMMM d", Locale.getDefault())
     return formatter.format(Calendar.getInstance().apply { timeInMillis = milliseconds }.time)
+}
+
+fun getTotalAmount(expenses: List<ExpenseItem>): String {
+    var totalAmount = 0.0
+    for (expense in expenses) {
+        totalAmount += expense.amount.toDouble()
+    }
+    return totalAmount.toString()
 }

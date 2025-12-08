@@ -15,4 +15,15 @@
     <string name="previous_date_desc">Previous date</string>
     <string name="cancel_text">Cancel</string>
     <string name="ok_text">OK</string>
+    <string name="add_expense_text">Add Expense</string>
+    <string name="category_text">Category</string>
+    <string name="dropdown_desc">Dropdown</string>
+    <string name="expense_name_text">Expense Name</string>
+    <string name="date_text">Date</string>
+    <string name="amount_text">Amount</string>
+    <string name="rupee_symbol">₹</string>
+    <string name="save_text">Save</string>
+    <string name="add_desc">Add</string>
+    <string name="expense_name_error">Please enter an expense name</string>
+    <string name="amount_error_message">Please enter a valid amount</string>
 </resources>
