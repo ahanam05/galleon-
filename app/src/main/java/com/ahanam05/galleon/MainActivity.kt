@@ -38,7 +38,9 @@ import com.google.firebase.auth.auth
 import com.google.firebase.Firebase
 import kotlinx.coroutines.launch
 import com.ahanam05.galleon.home.HomeScreen
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private lateinit var auth: FirebaseAuth
