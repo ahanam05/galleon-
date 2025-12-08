@@ -1,7 +1,7 @@
 package com.ahanam05.galleon
 
-import android.icu.text.SimpleDateFormat
-import android.icu.util.Calendar
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import com.ahanam05.galleon.home.ExpenseItem
 import java.util.Locale
 
@@ -20,7 +20,7 @@ fun formatDate(milliseconds: Long): String {
 fun getTotalAmount(expenses: List<ExpenseItem>): String {
     var totalAmount = 0.0
     for (expense in expenses) {
-        totalAmount += expense.amount.toDouble()
+        totalAmount += expense.amount.toDoubleOrNull() ?: 0.0
     }
     return totalAmount.toString()
 }
