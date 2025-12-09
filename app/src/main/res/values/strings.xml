@@ -16,6 +16,7 @@
     <string name="cancel_text">Cancel</string>
     <string name="ok_text">OK</string>
     <string name="add_expense_text">Add Expense</string>
+    <string name="edit_expense_text">Edit Expense</string>
     <string name="category_text">Category</string>
     <string name="dropdown_desc">Dropdown</string>
     <string name="expense_name_text">Expense Name</string>
@@ -26,4 +27,6 @@
     <string name="add_desc">Add</string>
     <string name="expense_name_error">Please enter an expense name</string>
     <string name="amount_error_message">Please enter a valid amount</string>
+    <string name="edit_desc">Edit</string>
+    <string name="delete_desc">Delete</string>
 </resources>

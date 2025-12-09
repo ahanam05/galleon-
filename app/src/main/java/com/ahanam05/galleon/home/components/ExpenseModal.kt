@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.ui.res.stringResource
 import com.ahanam05.galleon.R
+import com.ahanam05.galleon.home.ExpenseItem
 
 object Categories {
     const val FOOD = "Food"
@@ -36,14 +38,23 @@ object Categories {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddExpenseModal(
+fun ExpenseModal(
     onDismiss: () -> Unit,
-    onSave: (String, String, Long, String) -> Unit
+    onSave: (String, String, Long, String) -> Unit,
+    onDelete: () -> Unit,
+    existingExpense: ExpenseItem? = null,
+    title: String,
+    haveDeleteOption: Boolean = false
 ) {
-    var expenseName by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf(Categories.FOOD) }
-    var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    var amount by remember { mutableStateOf("") }
+    val defaultExpenseName = existingExpense?.title ?: ""
+    val defaultCategory = existingExpense?.category ?: Categories.FOOD
+    val defaultDate = existingExpense?.date ?: System.currentTimeMillis()
+    val defaultAmount = existingExpense?.amount ?: "0.00"
+
+    var expenseName by remember { mutableStateOf(defaultExpenseName) }
+    var selectedCategory by remember { mutableStateOf(defaultCategory) }
+    var selectedDate by remember { mutableLongStateOf(defaultDate)}
+    var amount by remember { mutableStateOf(defaultAmount) }
     var showCategoryDropdown by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var expenseNameError by remember { mutableStateOf(false)}
@@ -74,13 +85,25 @@ fun AddExpenseModal(
                     .fillMaxWidth()
                     .padding(24.dp)
             ) {
-                Text(
-                    text = stringResource(id = R.string.add_expense_text),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
+                Row(){
+                    Text(
+                        text = title,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    )
+
+                    if(haveDeleteOption){
+                        IconButton(onClick = onDelete) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = stringResource(id = R.string.delete_desc),
+                                tint = Color(0xFFFF6B6B)
+                            )
+                        }
+                    }
+                }
 
                 Text(
                     text = stringResource(id = R.string.category_text),

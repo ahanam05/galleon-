@@ -19,7 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ahanam05.galleon.home.components.AddExpenseModal
+import com.ahanam05.galleon.home.components.ExpenseModal
 import com.ahanam05.galleon.home.components.DateNavigationRow
 import com.ahanam05.galleon.home.components.DatePickerModal
 import com.ahanam05.galleon.home.components.ExpenseCard
@@ -66,7 +66,7 @@ fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
     var selectedTab by remember { mutableStateOf(Modes.DAILY) }
     var selectedDate by remember { mutableLongStateOf(Calendar.getInstance().timeInMillis) }
     var showDatePicker by  remember { mutableStateOf(false)}
-    var showAddExpenseModal by remember { mutableStateOf(false)}
+    var showExpenseModal by remember { mutableStateOf(false)}
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -119,7 +119,7 @@ fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
             containerColor = Color(0xFFF5F1E5),
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { showAddExpenseModal = true},
+                    onClick = { showExpenseModal = true},
                     containerColor = Color(0xFFE0B663),
                     shape = CircleShape,
                     modifier = Modifier
@@ -192,14 +192,16 @@ fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
                     }
                 }
 
-                if (showAddExpenseModal) {
-                    AddExpenseModal(
-                        onDismiss = { showAddExpenseModal = false },
+                if (showExpenseModal) {
+                    ExpenseModal(
+                        onDismiss = { showExpenseModal = false },
                         onSave = { name, category, date, amount ->
                             // TODO: Handle saving the expense to database
                             Log.d("AddExpense", "Name: $name, Category: $category, Date: $date, Amount: ₹$amount")
-                            showAddExpenseModal = false
-                        }
+                            showExpenseModal = false
+                        },
+                        onDelete = {},
+                        title = stringResource(id = R.string.add_expense_text)
                     )
                 }
             }
