@@ -92,12 +92,5 @@ fun LandingScreen(onSignInClick: () -> Unit) {
         }
 
         Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = stringResource(id = string.sign_in_text),
-            fontSize = 13.sp,
-            color = Color(0xFF999999),
-            textAlign = TextAlign.Center
-        )
     }
 }
