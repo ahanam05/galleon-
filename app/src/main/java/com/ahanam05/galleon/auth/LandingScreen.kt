@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -70,7 +71,8 @@ fun LandingScreen(onSignInClick: () -> Unit) {
                     shape = RoundedCornerShape(28.dp),
                     spotColor = Color.Black.copy(alpha = 0.15f)
                 )
-                .clickable(enabled = true, onClick = onSignInClick),
+                .clickable(enabled = true, onClick = onSignInClick)
+                .testTag(stringResource(id = string.sign_in_button_desc)),
             shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Color.White
