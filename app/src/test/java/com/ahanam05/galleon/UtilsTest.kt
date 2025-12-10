@@ -1,6 +1,6 @@
 package com.ahanam05.galleon
 
-import com.ahanam05.galleon.home.ExpenseItem
+import com.ahanam05.galleon.data.models.Expense
 import org.junit.Assert
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -69,9 +69,9 @@ class UtilsTest {
     @Test
     fun getTotalAmount_withMultipleExpenses_returnsCorrectSum() {
         val expenses = listOf(
-            ExpenseItem("Coffee", "Food","9.50", 0L),
-            ExpenseItem("Movie", "Entertainment","15.00",  0L),
-            ExpenseItem("Groceries", "Food","75.50",  0L)
+            Expense("1","Coffee", 9.50,"Food", 0L),
+            Expense("2","Movie", 15.00,"Entertainment",  0L),
+            Expense("3","Groceries", 75.5,"Food",  0L)
         )
 
         val result = getTotalAmount(expenses)
@@ -81,23 +81,10 @@ class UtilsTest {
 
     @Test
     fun getTotalAmount_withEmptyList_returnsZero() {
-        val expenses = emptyList<ExpenseItem>()
+        val expenses = emptyList<Expense>()
 
         val result = getTotalAmount(expenses)
 
         Assert.assertEquals("0.0", result)
-    }
-
-    @Test
-    fun getTotalAmount_withInvalidAmount_ignoresInvalidValue() {
-        val expenses = listOf(
-            ExpenseItem("Book", "Entertainment","20.0",  0L),
-            ExpenseItem("Corrupted Data", "not_a_number", "Error", 0L),
-            ExpenseItem("Snack", "Food","5.0",  0L)
-        )
-
-        val result = getTotalAmount(expenses)
-
-        Assert.assertEquals("25.0", result)
     }
 }
