@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ahanam05.galleon.home.components.ExpenseModal
 import com.ahanam05.galleon.home.components.DateNavigationRow
 import com.ahanam05.galleon.home.components.DatePickerModal
@@ -47,21 +48,10 @@ object Modes{
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
-    val expenses = remember {
-        val today = Calendar.getInstance().timeInMillis
-        val yesterday = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }.timeInMillis
-        val tomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, +1) }.timeInMillis
-        listOf(
-            ExpenseItem("Coffee", "Food", "200.50", today),
-            ExpenseItem("Groceries", "Food",  "580", yesterday),
-            ExpenseItem("Bus Fare", "Transportation",  "40", tomorrow),
-            ExpenseItem("Dinner", "Food",  "380", today),
-            ExpenseItem("Snacks", "Food", "120", yesterday),
-            ExpenseItem("Movie Ticket", "Entertainment",  "285", today),
-            ExpenseItem("Taxi", "Transportation",  "150", today)
-        )
-    }
+fun HomeScreen(onSignOutClick: () -> Unit,
+               user: FirebaseUser?,
+               viewModel: HomeViewModel = hiltViewModel()) {
+    val expenses by viewModel.expenses.collectAsState()
 
     var selectedTab by remember { mutableStateOf(Modes.DAILY) }
     var selectedDate by remember { mutableLongStateOf(Calendar.getInstance().timeInMillis) }
@@ -196,12 +186,13 @@ fun HomeScreen(onSignOutClick: () -> Unit, user: FirebaseUser?) {
                     ExpenseModal(
                         onDismiss = { showExpenseModal = false },
                         onSave = { name, category, date, amount ->
-                            // TODO: Handle saving the expense to database
-                            Log.d("AddExpense", "Name: $name, Category: $category, Date: $date, Amount: ₹$amount")
+                            Log.d("Add Expense", "Name: $name, Category: $category, Date: $date, Amount: ₹$amount")
+                            viewModel.addExpense(name, category, amount, date)
                             showExpenseModal = false
                         },
                         onDelete = {},
-                        title = stringResource(id = R.string.add_expense_text)
+                        title = stringResource(id = R.string.add_expense_text),
+                        existingExpense = null
                     )
                 }
             }

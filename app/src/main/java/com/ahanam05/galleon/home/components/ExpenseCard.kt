@@ -35,10 +35,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ahanam05.galleon.R
-import com.ahanam05.galleon.home.ExpenseItem
+import com.ahanam05.galleon.data.models.Expense
 
 @Composable
-fun ExpenseCard(expense: ExpenseItem) {
+fun ExpenseCard(expense: Expense) {
     var showExpenseModal by remember { mutableStateOf(false)}
 
     if (showExpenseModal) {
@@ -100,7 +100,7 @@ fun ExpenseCard(expense: ExpenseItem) {
 
                 expense.category.let { category ->
                     Surface(
-                        color = expense.categoryColor,
+                        color = Color(0xFFF7E8CA),
                         shape = RoundedCornerShape(18.dp)
                     ) {
                         Text(

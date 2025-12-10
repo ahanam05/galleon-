@@ -23,7 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.ui.res.stringResource
 import com.ahanam05.galleon.R
-import com.ahanam05.galleon.home.ExpenseItem
+import com.ahanam05.galleon.data.models.Expense
 
 object Categories {
     const val FOOD = "Food"
@@ -42,7 +42,7 @@ fun ExpenseModal(
     onDismiss: () -> Unit,
     onSave: (String, String, Long, String) -> Unit,
     onDelete: () -> Unit,
-    existingExpense: ExpenseItem? = null,
+    existingExpense: Expense?,
     title: String,
     haveDeleteOption: Boolean = false
 ) {
@@ -253,11 +253,11 @@ fun ExpenseModal(
                 )
 
                 OutlinedTextField(
-                    value = amount,
+                    value = amount.toString(),
                     onValueChange = {
                         if (it.matches(Regex("^\\d*\\.?\\d{0,2}$"))) {
                             amount = it
-                            amountError = amount.isEmpty()
+                            amountError = amount.toString().isEmpty()
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -301,8 +301,8 @@ fun ExpenseModal(
                 ) {
                     Button(
                         onClick = {
-                            if (expenseName.isNotEmpty() && amount.isNotEmpty()) {
-                                onSave(expenseName, selectedCategory, selectedDate, amount)
+                            if (expenseName.isNotEmpty() && amount.toString().isNotEmpty()) {
+                                onSave(expenseName, selectedCategory, selectedDate, amount.toString())
                                 onDismiss()
                             }
                         },

@@ -1,8 +1,8 @@
 package com.ahanam05.galleon
 
+import com.ahanam05.galleon.data.models.Expense
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import com.ahanam05.galleon.home.ExpenseItem
 import java.util.Locale
 
 fun isSameDay(millis1: Long, millis2: Long): Boolean {
@@ -17,10 +17,10 @@ fun formatDate(milliseconds: Long): String {
     return formatter.format(Calendar.getInstance().apply { timeInMillis = milliseconds }.time)
 }
 
-fun getTotalAmount(expenses: List<ExpenseItem>): String {
+fun getTotalAmount(expenses: List<Expense>): String {
     var totalAmount = 0.0
     for (expense in expenses) {
-        totalAmount += expense.amount.toDoubleOrNull() ?: 0.0
+        totalAmount += expense.amount
     }
     return totalAmount.toString()
 }
