@@ -40,7 +40,7 @@ object Categories {
 @Composable
 fun ExpenseModal(
     onDismiss: () -> Unit,
-    onSave: (String, String, Long, String) -> Unit,
+    onSave: (Expense?, String, String, Long, String) -> Unit,
     onDelete: () -> Unit,
     existingExpense: Expense?,
     title: String,
@@ -302,7 +302,7 @@ fun ExpenseModal(
                     Button(
                         onClick = {
                             if (expenseName.isNotEmpty() && amount.toString().isNotEmpty()) {
-                                onSave(expenseName, selectedCategory, selectedDate, amount.toString())
+                                onSave(existingExpense, expenseName, selectedCategory, selectedDate, amount.toString())
                                 onDismiss()
                             }
                         },

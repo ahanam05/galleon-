@@ -12,6 +12,10 @@ class ExpenseRepositoryImpl @Inject constructor (private val db: FirebaseFiresto
 
     val USER_COLLECTION = "users"
     val EXPENSES_SUBCOLLECTION = "expenses"
+    val AMOUNT_FIELD = "amount"
+    val CATEGORY_FIELD = "category"
+    val DATE_FIELD = "date"
+    val TITLE_FIELD = "title"
 
     override suspend fun addExpense(
         userId: String,
@@ -66,7 +70,21 @@ class ExpenseRepositoryImpl @Inject constructor (private val db: FirebaseFiresto
         expenseId: String,
         expense: Expense
     ): String? {
-        TODO("Not yet implemented")
+        val updates = hashMapOf<String, Any>(
+            AMOUNT_FIELD to expense.amount,
+            CATEGORY_FIELD to expense.category,
+            DATE_FIELD to expense.date,
+            TITLE_FIELD to expense.title,
+        )
+
+        db.collection(USER_COLLECTION)
+            .document(userId)
+            .collection(EXPENSES_SUBCOLLECTION)
+            .document(expenseId)
+            .update(updates)
+            .await()
+
+        return expenseId
     }
 
     override suspend fun deleteExpense(

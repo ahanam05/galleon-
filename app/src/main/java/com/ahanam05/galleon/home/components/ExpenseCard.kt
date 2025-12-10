@@ -36,17 +36,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ahanam05.galleon.R
 import com.ahanam05.galleon.data.models.Expense
+import com.ahanam05.galleon.home.HomeViewModel
 
 @Composable
-fun ExpenseCard(expense: Expense) {
+fun ExpenseCard(expense: Expense, viewModel: HomeViewModel) {
     var showExpenseModal by remember { mutableStateOf(false)}
 
     if (showExpenseModal) {
         ExpenseModal(
             onDismiss = { showExpenseModal = false },
-            onSave = { name, category, date, amount ->
-                // TODO: Handle updating the expense in the database
-                Log.d("Edit Expense", "Name: $name, Category: $category, Date: $date, Amount: ₹$amount")
+            onSave = { expense, name, category, date, amount ->
+                Log.d("Update Expense", "Name: $name, Category: $category, Date: $date, Amount: ₹$amount")
+                viewModel.updateExpense(expense, name, category, amount, date)
                 showExpenseModal = false
             },
             onDelete = {

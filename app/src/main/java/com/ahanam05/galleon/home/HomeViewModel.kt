@@ -1,5 +1,6 @@
 package com.ahanam05.galleon.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahanam05.galleon.data.models.Expense
@@ -41,6 +42,28 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch {
             expenseRepository.addExpense(userId, expense)
+        }
+    }
+
+    fun updateExpense(existingExpense: Expense?, title: String, category: String, amountStr: String, date: Long){
+        val userId = auth.currentUser?.uid ?: return
+        val expenseId = existingExpense?.id?: ""
+        val amount = amountStr.toDoubleOrNull() ?: 0.0
+        val newExpense = Expense(
+            id = expenseId,
+            title = title,
+            amount = amount,
+            category = category,
+            date = date
+        )
+
+        if(existingExpense == newExpense){
+            Log.d("Update Expense", "No changes made to the expense")
+            return
+        }
+
+        viewModelScope.launch {
+            expenseRepository.updateExpense(userId, expenseId, newExpense)
         }
     }
 }

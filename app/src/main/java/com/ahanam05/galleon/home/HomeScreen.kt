@@ -33,14 +33,6 @@ import kotlinx.coroutines.launch
 import com.ahanam05.galleon.R
 import com.ahanam05.galleon.getTotalAmount
 
-data class ExpenseItem(
-    val title: String,
-    val category: String,
-    val amount: String,
-    val date: Long,
-    val categoryColor: Color = Color(0xFFF7E8CA)
-)
-
 object Modes{
     const val DAILY = "Daily"
     const val WEEKLY = "Weekly"
@@ -178,14 +170,15 @@ fun HomeScreen(onSignOutClick: () -> Unit,
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(filteredExpenses) { expense ->
-                        ExpenseCard(expense)
+                        ExpenseCard(expense = expense,
+                            viewModel = viewModel)
                     }
                 }
 
                 if (showExpenseModal) {
                     ExpenseModal(
                         onDismiss = { showExpenseModal = false },
-                        onSave = { name, category, date, amount ->
+                        onSave = { expense, name, category, date, amount ->
                             Log.d("Add Expense", "Name: $name, Category: $category, Date: $date, Amount: ₹$amount")
                             viewModel.addExpense(name, category, amount, date)
                             showExpenseModal = false
