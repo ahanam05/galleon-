@@ -66,4 +66,12 @@ class HomeViewModel @Inject constructor(
             expenseRepository.updateExpense(userId, expenseId, newExpense)
         }
     }
+
+    fun deleteExpense(expenseId: String){
+        val userId = auth.currentUser?.uid ?: return
+
+        viewModelScope.launch {
+            expenseRepository.deleteExpense(userId, expenseId)
+        }
+    }
 }

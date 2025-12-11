@@ -91,6 +91,17 @@ class ExpenseRepositoryImpl @Inject constructor (private val db: FirebaseFiresto
         userId: String,
         expenseId: String
     ): Boolean {
-        TODO("Not yet implemented")
+        try{
+            db.collection(USER_COLLECTION)
+                .document(userId)
+                .collection(EXPENSES_SUBCOLLECTION)
+                .document(expenseId)
+                .delete()
+                .await()
+
+            return true
+        } catch(e: Exception){
+            return false
+        }
     }
 }

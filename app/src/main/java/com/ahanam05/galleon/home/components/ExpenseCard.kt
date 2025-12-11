@@ -50,9 +50,9 @@ fun ExpenseCard(expense: Expense, viewModel: HomeViewModel) {
                 viewModel.updateExpense(expense, name, category, amount, date)
                 showExpenseModal = false
             },
-            onDelete = {
-                // TODO: Handle deleting the expense from the database
+            onDelete = { expenseId ->
                 Log.d("Delete Expense", "Deleting expense: ${expense.title}")
+                viewModel.deleteExpense(expenseId)
                 showExpenseModal = false
             },
             title = stringResource(id = R.string.edit_expense_text),

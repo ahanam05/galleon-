@@ -29,4 +29,6 @@
     <string name="amount_error_message">Please enter a valid amount</string>
     <string name="edit_desc">Edit</string>
     <string name="delete_desc">Delete</string>
+    <string name="delete_dialog_title">Confirm Deletion</string>
+    <string name="delete_dialog_text">Are you sure you want to delete this expense?</string>
 </resources>

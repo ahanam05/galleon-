@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,7 +43,7 @@ object Categories {
 fun ExpenseModal(
     onDismiss: () -> Unit,
     onSave: (Expense?, String, String, Long, String) -> Unit,
-    onDelete: () -> Unit,
+    onDelete: (String) -> Unit,
     existingExpense: Expense?,
     title: String,
     haveDeleteOption: Boolean = false
@@ -57,6 +59,8 @@ fun ExpenseModal(
     var amount by remember { mutableStateOf(defaultAmount) }
     var showCategoryDropdown by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+
     var expenseNameError by remember { mutableStateOf(false)}
     var amountError by remember { mutableStateOf(false)}
 
@@ -70,6 +74,42 @@ fun ExpenseModal(
         Categories.MISCELLANEOUS)
 
     val dateFormatter = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) }
+
+    if (showDeleteConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmDialog = false },
+            containerColor = Color(0xFF3A3A3A),
+            titleContentColor = Color.White,
+            textContentColor = Color.White,
+            title = { Text(text = stringResource(id = R.string.delete_dialog_title)) },
+            text = { Text(text = stringResource(id = R.string.delete_dialog_text)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onDelete(existingExpense?.id ?: "")
+                        showDeleteConfirmDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6B6B))
+                ) {
+                    Text(stringResource(id = R.string.delete_desc), color = Color.White)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { showDeleteConfirmDialog = false },
+                    border = ButtonDefaults.outlinedButtonBorder.copy(
+                        width = 1.dp,
+                        brush = androidx.compose.ui.graphics.SolidColor(Color(0xFFE0B663))
+                    ),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color(0xFFE0B663)
+                    )
+                ) {
+                    Text(stringResource(id = R.string.cancel_text))
+                }
+            }
+        )
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -85,17 +125,22 @@ fun ExpenseModal(
                     .fillMaxWidth()
                     .padding(24.dp)
             ) {
-                Row(){
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ){
                     Text(
                         text = title,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
-                        modifier = Modifier.padding(bottom = 24.dp)
                     )
 
                     if(haveDeleteOption){
-                        IconButton(onClick = onDelete) {
+                        IconButton(onClick = { showDeleteConfirmDialog = true }) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
                                 contentDescription = stringResource(id = R.string.delete_desc),
