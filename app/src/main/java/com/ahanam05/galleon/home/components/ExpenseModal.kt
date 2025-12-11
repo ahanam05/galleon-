@@ -46,11 +46,12 @@ fun ExpenseModal(
     onDelete: (String) -> Unit,
     existingExpense: Expense?,
     title: String,
-    haveDeleteOption: Boolean = false
+    haveDeleteOption: Boolean = false,
+    selectedDate: Long
 ) {
     val defaultExpenseName = existingExpense?.title ?: ""
     val defaultCategory = existingExpense?.category ?: Categories.FOOD
-    val defaultDate = existingExpense?.date ?: System.currentTimeMillis()
+    val defaultDate = existingExpense?.date ?: selectedDate
     val defaultAmount = existingExpense?.amount ?: "0.00"
 
     var expenseName by remember { mutableStateOf(defaultExpenseName) }
@@ -151,6 +152,45 @@ fun ExpenseModal(
                 }
 
                 Text(
+                    text = stringResource(id = R.string.expense_name_text),
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                OutlinedTextField(
+                    value = expenseName,
+                    onValueChange = {
+                        expenseName = it
+                        expenseNameError = it.isEmpty()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color(0xFF2D2D2D),
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        cursorColor = Color.Black
+                    ),
+                    singleLine = true,
+                    isError = expenseNameError
+                )
+
+                if (expenseNameError) {
+                    Text(
+                        text = stringResource(id = R.string.expense_name_error),
+                        fontSize = 12.sp,
+                        color = Color(0xFFFF6B6B),
+                        modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
                     text = stringResource(id = R.string.category_text),
                     fontSize = 12.sp,
                     color = Color.Gray,
@@ -210,45 +250,6 @@ fun ExpenseModal(
                             )
                         }
                     }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = stringResource(id = R.string.expense_name_text),
-                    fontSize = 12.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                OutlinedTextField(
-                    value = expenseName,
-                    onValueChange = {
-                        expenseName = it
-                        expenseNameError = it.isEmpty()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color(0xFF2D2D2D),
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        cursorColor = Color.Black
-                    ),
-                    singleLine = true,
-                    isError = expenseNameError
-                )
-
-                if (expenseNameError) {
-                    Text(
-                        text = stringResource(id = R.string.expense_name_error),
-                        fontSize = 12.sp,
-                        color = Color(0xFFFF6B6B),
-                        modifier = Modifier.padding(start = 4.dp, top = 4.dp)
-                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

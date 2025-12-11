@@ -57,7 +57,8 @@ fun ExpenseCard(expense: Expense, viewModel: HomeViewModel) {
             },
             title = stringResource(id = R.string.edit_expense_text),
             existingExpense = expense,
-            haveDeleteOption = true
+            haveDeleteOption = true,
+            selectedDate = expense.date
         )
     }
 

@@ -185,7 +185,8 @@ fun HomeScreen(onSignOutClick: () -> Unit,
                         },
                         onDelete = {},
                         title = stringResource(id = R.string.add_expense_text),
-                        existingExpense = null
+                        existingExpense = null,
+                        selectedDate = selectedDate
                     )
                 }
             }
