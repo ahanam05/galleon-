@@ -115,7 +115,7 @@ fun ExpenseModal(
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF3A3A3A),
+            color = Color.White,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
@@ -137,7 +137,7 @@ fun ExpenseModal(
                         text = title,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = Color.Black,
                     )
 
                     if(haveDeleteOption){
@@ -167,10 +167,10 @@ fun ExpenseModal(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color(0xFF2D2D2D),
+                        focusedContainerColor = Color(0xFFF4F6F7),
+                        unfocusedContainerColor = Color(0xFFF4F6F7),
                         focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.White,
+                        unfocusedTextColor = Color.Black,
                         focusedBorderColor = Color.Transparent,
                         unfocusedBorderColor = Color.Transparent,
                         cursorColor = Color.Black
@@ -200,7 +200,7 @@ fun ExpenseModal(
                 Box {
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = if (showCategoryDropdown) Color.White else Color(0xFF2D2D2D),
+                        color = Color(0xFFF4F6F7),
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { showCategoryDropdown = true }
@@ -214,7 +214,7 @@ fun ExpenseModal(
                         ) {
                             Text(
                                 text = selectedCategory,
-                                color = if (showCategoryDropdown) Color.Black else Color.White,
+                                color = Color.Black,
                                 fontSize = 16.sp
                             )
                             Icon(
@@ -230,14 +230,14 @@ fun ExpenseModal(
                         onDismissRequest = { showCategoryDropdown = false },
                         modifier = Modifier
                             .width(250.dp)
-                            .background(Color(0xFF2D2D2D))
+                            .background(Color(0xFFF4F6F7))
                     ) {
                         categories.forEach { category ->
                             DropdownMenuItem(
                                 text = {
                                     Text(
                                         text = category,
-                                        color = Color.White
+                                        color = Color.Black
                                     )
                                 },
                                 onClick = {
@@ -245,7 +245,7 @@ fun ExpenseModal(
                                     showCategoryDropdown = false
                                 },
                                 colors = MenuDefaults.itemColors(
-                                    textColor = Color.White
+                                    textColor = Color.Black
                                 )
                             )
                         }
@@ -263,7 +263,7 @@ fun ExpenseModal(
 
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFF2D2D2D),
+                    color = Color(0xFFF4F6F7),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { showDatePicker = true }
@@ -277,7 +277,7 @@ fun ExpenseModal(
                     ) {
                         Text(
                             text = dateFormatter.format(Date(selectedDate)),
-                            color = Color.White,
+                            color = Color.Black,
                             fontSize = 16.sp
                         )
                         Icon(
@@ -317,10 +317,10 @@ fun ExpenseModal(
                         )
                     },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color(0xFF2D2D2D),
+                        focusedContainerColor = Color(0xFFF4F6F7),
+                        unfocusedContainerColor = Color(0xFFF4F6F7),
                         focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.White,
+                        unfocusedTextColor = Color.Black,
                         focusedBorderColor = Color.Transparent,
                         unfocusedBorderColor = Color.Transparent,
                         cursorColor = Color.Black
@@ -376,7 +376,7 @@ fun ExpenseModal(
                         shape = RoundedCornerShape(25.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
                             containerColor = Color.Transparent,
-                            contentColor = Color.White
+                            contentColor = Color.Black
                         ),
                         border = ButtonDefaults.outlinedButtonBorder.copy(
                             width = 1.dp,

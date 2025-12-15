@@ -45,6 +45,7 @@ fun HomeScreen(onSignOutClick: () -> Unit,
                viewModel: HomeViewModel = hiltViewModel()) {
     val expenses by viewModel.expenses.collectAsState()
 
+    val MutedGold = Color(0xFFDDAA44)
     var selectedTab by remember { mutableStateOf(Modes.DAILY) }
     var selectedDate by remember { mutableLongStateOf(Calendar.getInstance().timeInMillis) }
     var showDatePicker by  remember { mutableStateOf(false)}
@@ -98,11 +99,11 @@ fun HomeScreen(onSignOutClick: () -> Unit,
         gesturesEnabled = true
     ) {
         Scaffold(
-            containerColor = Color(0xFFF5F1E5),
+            containerColor = Color(0xFFF9F7F0),
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = { showExpenseModal = true},
-                    containerColor = Color(0xFFE0B663),
+                    containerColor = MutedGold,
                     shape = CircleShape,
                     modifier = Modifier
                         .size(60.dp)
@@ -130,10 +131,6 @@ fun HomeScreen(onSignOutClick: () -> Unit,
                         }
                     }
                 )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                WelcomeSection(userName = user?.displayName ?: "User")
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -194,13 +191,3 @@ fun HomeScreen(onSignOutClick: () -> Unit,
     }
 }
 
-@Composable
-fun WelcomeSection(userName: String) {
-    Text(
-        text = "Welcome, $userName",
-        fontSize = 22.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = Color(0xFF2D2D2D),
-        modifier = Modifier.padding(horizontal = 16.dp)
-    )
-}

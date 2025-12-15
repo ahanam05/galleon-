@@ -11,16 +11,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +33,11 @@ import androidx.compose.ui.unit.sp
 import com.ahanam05.galleon.R
 import com.ahanam05.galleon.data.models.Expense
 import com.ahanam05.galleon.home.HomeViewModel
+
+
+val ExpenseCardContainerColor = Color(0xFFFFFDF8)
+val CategoryTagColor = Color(0xFFEAE4D0)
+val MutedGold = Color(0xFFDDAA44)
 
 @Composable
 fun ExpenseCard(expense: Expense, viewModel: HomeViewModel) {
@@ -69,9 +70,10 @@ fun ExpenseCard(expense: Expense, viewModel: HomeViewModel) {
                 elevation = 4.dp,
                 shape = RoundedCornerShape(20.dp),
                 ambientColor = Color.Black.copy(alpha = 0.08f)
-            ),
+            )
+            .clickable { showExpenseModal = true },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F7EA))
+        colors = CardDefaults.cardColors(containerColor = ExpenseCardContainerColor)
     ) {
         Row(
             modifier = Modifier
@@ -82,7 +84,7 @@ fun ExpenseCard(expense: Expense, viewModel: HomeViewModel) {
                 modifier = Modifier
                     .width(5.dp)
                     .height(48.dp)
-                    .background(Color(0xFFE0B663), RoundedCornerShape(2.dp))
+                    .background(MutedGold, RoundedCornerShape(2.dp))
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -98,12 +100,10 @@ fun ExpenseCard(expense: Expense, viewModel: HomeViewModel) {
                     color = Color(0xFF2D2D2D)
                 )
 
-                Spacer(modifier = Modifier.weight(1f))
-
                 expense.category.let { category ->
                     Surface(
-                        color = Color(0xFFF7E8CA),
-                        shape = RoundedCornerShape(18.dp)
+                        color = CategoryTagColor,
+                        shape = RoundedCornerShape(10.dp)
                     ) {
                         Text(
                             text = category,
@@ -125,20 +125,6 @@ fun ExpenseCard(expense: Expense, viewModel: HomeViewModel) {
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF2D2D2D)
-                    )
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Icon(
-                        imageVector = Icons.Filled.Edit,
-                        contentDescription = stringResource(id = R.string.edit_desc),
-                        modifier = Modifier.size(20.dp)
-                            .clickable(
-                                onClick = {
-                                    showExpenseModal = true
-                                }
-                            ),
-                        tint = Color(0xFF2D2D2D),
                     )
                 }
             }

@@ -42,7 +42,7 @@ fun NavigationDrawerContent(
     onSignOutClick: () -> Unit
 ) {
     ModalDrawerSheet(
-        drawerContainerColor = Color(0xFFFFF5DD),
+        drawerContainerColor = Color(0xFFFBF8F2),
         modifier = Modifier.width(250.dp)
     ) {
         Column(
@@ -105,30 +105,6 @@ fun NavigationDrawerContent(
             NavigationDrawerItem(
                 icon = {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                        contentDescription = stringResource(id = R.string.sign_out_text),
-                        tint = Color(0xFF2D2D2D),
-                        modifier = Modifier.testTag(stringResource(id = R.string.sign_out_text))
-                    )
-                },
-                label = {
-                    Text(
-                        text = stringResource(id = R.string.sign_out_text),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF2D2D2D)
-                    )
-                },
-                selected = false,
-                onClick = onSignOutClick,
-                colors = NavigationDrawerItemDefaults.colors(
-                    unselectedContainerColor = Color.Transparent
-                )
-            )
-
-            NavigationDrawerItem(
-                icon = {
-                    Icon(
                         imageVector = Icons.Filled.Settings,
                         contentDescription = stringResource(id = R.string.settings_desc),
                         tint = Color(0xFF2D2D2D)
@@ -144,6 +120,30 @@ fun NavigationDrawerContent(
                 },
                 selected = false,
                 onClick = { /* Navigate to settings */},
+                colors = NavigationDrawerItemDefaults.colors(
+                    unselectedContainerColor = Color.Transparent
+                )
+            )
+
+            NavigationDrawerItem(
+                icon = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = stringResource(id = R.string.sign_out_text),
+                        tint = Color(0xFFE44A4F),
+                        modifier = Modifier.testTag(stringResource(id = R.string.sign_out_text))
+                    )
+                },
+                label = {
+                    Text(
+                        text = stringResource(id = R.string.sign_out_text),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFFE44A4F)
+                    )
+                },
+                selected = false,
+                onClick = onSignOutClick,
                 colors = NavigationDrawerItemDefaults.colors(
                     unselectedContainerColor = Color.Transparent
                 )
