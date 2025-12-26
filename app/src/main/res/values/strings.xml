@@ -31,4 +31,6 @@
     <string name="delete_desc">Delete</string>
     <string name="delete_dialog_title">Confirm Deletion</string>
     <string name="delete_dialog_text">Are you sure you want to delete this expense?</string>
+    <string name="no_expenses_found">No expenses found</string>
+    <string name="no_expenses_prompt">You haven\'t added any expenses for this day. Tap the + button to add your first record.</string>
 </resources>

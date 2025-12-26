@@ -32,6 +32,7 @@ import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 import com.ahanam05.galleon.R
 import com.ahanam05.galleon.getTotalAmount
+import com.ahanam05.galleon.home.components.NoExpensesFound
 
 object Modes{
     const val DAILY = "Daily"
@@ -160,15 +161,20 @@ fun HomeScreen(onSignOutClick: () -> Unit,
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(filteredExpenses) { expense ->
-                        ExpenseCard(expense = expense,
-                            viewModel = viewModel)
+                if (filteredExpenses.isEmpty()) {
+                    NoExpensesFound()
+                }
+                else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(filteredExpenses) { expense ->
+                            ExpenseCard(expense = expense,
+                                viewModel = viewModel)
+                        }
                     }
                 }
 
@@ -190,4 +196,3 @@ fun HomeScreen(onSignOutClick: () -> Unit,
         }
     }
 }
-
