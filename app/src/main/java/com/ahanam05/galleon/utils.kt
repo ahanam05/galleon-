@@ -24,3 +24,55 @@ fun getTotalAmount(expenses: List<Expense>): String {
     }
     return totalAmount.toString()
 }
+
+fun getWeekStartDate(dateMillis: Long): Long {
+    val calendar = Calendar.getInstance().apply { timeInMillis = dateMillis }
+
+    while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+        calendar.add(Calendar.DAY_OF_YEAR, -1)
+    }
+
+    calendar.set(Calendar.HOUR_OF_DAY, 0)
+    calendar.set(Calendar.MINUTE, 0)
+    calendar.set(Calendar.SECOND, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
+    return calendar.timeInMillis
+}
+
+fun getWeekEndDate(dateMillis: Long): Long {
+    val calendar = Calendar.getInstance().apply { timeInMillis = dateMillis }
+
+    while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
+        calendar.add(Calendar.DAY_OF_YEAR, 1)
+    }
+
+    calendar.set(Calendar.HOUR_OF_DAY, 23)
+    calendar.set(Calendar.MINUTE, 59)
+    calendar.set(Calendar.SECOND, 59)
+    calendar.set(Calendar.MILLISECOND, 999)
+    return calendar.timeInMillis
+}
+
+fun getWeekRange(dateMillis: Long): Pair<Long, Long> {
+    return Pair(getWeekStartDate(dateMillis), getWeekEndDate(dateMillis))
+}
+
+fun isInWeek(dateToCheck: Long, weekStartDateMillis: Long, weekEndDateMillis: Long): Boolean {
+    return dateToCheck >= weekStartDateMillis && dateToCheck <= weekEndDateMillis
+}
+
+fun formatWeekRange(startDateMillis: Long, endDateMillis: Long): String {
+    val startCal = Calendar.getInstance().apply { timeInMillis = startDateMillis }
+    val endCal = Calendar.getInstance().apply { timeInMillis = endDateMillis }
+
+    val startMonth = startCal.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())
+    val endMonth = endCal.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())
+    val startDay = startCal.get(Calendar.DAY_OF_MONTH)
+    val endDay = endCal.get(Calendar.DAY_OF_MONTH)
+
+    return if (startMonth == endMonth) {
+        "$startMonth $startDay - $endDay"
+    } else {
+        "$startMonth $startDay - $endMonth $endDay"
+    }
+}
