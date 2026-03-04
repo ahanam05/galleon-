@@ -41,6 +41,9 @@ class HomeViewModel @Inject constructor(
     private val _dailyAverageAmount = MutableStateFlow<Double>(0.0)
     val dailyAverageAmount: StateFlow<Double> = _dailyAverageAmount.asStateFlow()
 
+    private val _topCategory = MutableStateFlow<Pair<String, Double>?>(null)
+    val topCategory: StateFlow<Pair<String, Double>?> = _topCategory.asStateFlow()
+
     init {
         auth.currentUser?.uid?.let { userId ->
             viewModelScope.launch {
@@ -129,5 +132,9 @@ class HomeViewModel @Inject constructor(
         val daysWithExpenses = breakdown.values.count { it > 0.0 }
         val average = if (daysWithExpenses > 0) total / daysWithExpenses else 0.0
         _dailyAverageAmount.value = average
+
+        val topCategory = ExpenseAggregator.getTopCategoryByExpense(currentExpenses, weekStart, weekEnd)
+        _topCategory.value = topCategory
+
     }
 }
