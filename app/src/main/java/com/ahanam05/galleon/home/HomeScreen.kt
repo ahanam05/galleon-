@@ -31,6 +31,8 @@ import com.ahanam05.galleon.isSameDay
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 import com.ahanam05.galleon.R
+import com.ahanam05.galleon.formatDate
+import com.ahanam05.galleon.formatWeekRange
 import com.ahanam05.galleon.getTotalAmount
 import com.ahanam05.galleon.home.components.DailyBreakdownChart
 import com.ahanam05.galleon.home.components.NoExpensesFound
@@ -162,7 +164,11 @@ fun HomeScreen(onSignOutClick: () -> Unit,
                 Spacer(modifier = Modifier.height(20.dp))
 
                 DateNavigationRow(
-                    selectedDate = selectedDate,
+                    selectedDate = if (selectedTab == Modes.WEEKLY) {
+                        formatWeekRange(weekStartDate, weekEndDate)
+                    } else {
+                        formatDate(selectedDate)
+                    },
                     onPreviousDate = decrementDate,
                     onNextDate = incrementDate,
                     onShowDatePicker = { showDatePicker = true }

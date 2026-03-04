@@ -21,11 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ahanam05.galleon.R
-import com.ahanam05.galleon.formatDate
 
 @Composable
 fun DateNavigationRow(
-    selectedDate: Long,
+    selectedDate: String,
     onPreviousDate: () -> Unit,
     onNextDate: () -> Unit,
     onShowDatePicker: () -> Unit
@@ -46,7 +45,7 @@ fun DateNavigationRow(
         }
 
         Text(
-            text = formatDate(selectedDate),
+            text = selectedDate,
             fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFF2D2D2D)
