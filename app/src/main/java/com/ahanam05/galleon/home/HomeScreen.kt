@@ -32,6 +32,7 @@ import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 import com.ahanam05.galleon.R
 import com.ahanam05.galleon.getTotalAmount
+import com.ahanam05.galleon.home.components.DailyBreakdownChart
 import com.ahanam05.galleon.home.components.NoExpensesFound
 
 object Modes{
@@ -46,6 +47,13 @@ fun HomeScreen(onSignOutClick: () -> Unit,
                viewModel: HomeViewModel = hiltViewModel()) {
     val expenses by viewModel.expenses.collectAsState()
 
+    val weeklyTotal by viewModel.weeklyTotal.collectAsState()
+    val dailyBreakdownByDay by viewModel.dailyBreakdownByDay.collectAsState()
+    val dailyAverageAmount by viewModel.dailyAverageAmount.collectAsState()
+    val weekStartDate by viewModel.weekStartDate.collectAsState()
+    val weekEndDate by viewModel.weekEndDate.collectAsState()
+    val topCategory by viewModel.topCategory.collectAsState()
+
     val MutedGold = Color(0xFFDDAA44)
     var selectedTab by remember { mutableStateOf(Modes.DAILY) }
     var selectedDate by remember { mutableLongStateOf(Calendar.getInstance().timeInMillis) }
@@ -54,6 +62,14 @@ fun HomeScreen(onSignOutClick: () -> Unit,
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(selectedDate) {
+        viewModel.updateSelectedDate(selectedDate)
+    }
+
+    LaunchedEffect(selectedTab) {
+        viewModel.updateSelectedTab(selectedTab)
+    }
 
     if(showDatePicker){
         DatePickerModal(
@@ -83,6 +99,9 @@ fun HomeScreen(onSignOutClick: () -> Unit,
 
     val filteredExpenses = expenses.filter { isSameDay(it.date, selectedDate) }
     val totalForDay = getTotalAmount(filteredExpenses)
+    val weeklyFilteredExpenses = expenses.filter { expense ->
+        expense.date in weekStartDate..weekEndDate
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -151,32 +170,58 @@ fun HomeScreen(onSignOutClick: () -> Unit,
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = "Total: ₹$totalForDay",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2D2D2D),
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                // Conditional rendering based on selected tab
+                when (selectedTab) {
+                    Modes.DAILY -> {
+                        Text(
+                            text = "Total: ₹$totalForDay",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2D2D2D),
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                if (filteredExpenses.isEmpty()) {
-                    NoExpensesFound()
-                }
-                else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(filteredExpenses) { expense ->
-                            ExpenseCard(expense = expense,
-                                viewModel = viewModel)
+                        if (filteredExpenses.isEmpty()) {
+                            NoExpensesFound()
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(filteredExpenses) { expense ->
+                                    ExpenseCard(
+                                        expense = expense,
+                                        viewModel = viewModel
+                                    )
+                                }
+                            }
                         }
                     }
-                }
+
+                    Modes.WEEKLY -> {
+                        DailyBreakdownChart(
+                            dailyBreakdown = dailyBreakdownByDay,
+                            weekStartDate = weekStartDate,
+                            weeklyTotal = weeklyTotal,
+                            topCategory = topCategory,
+                            dailyAverage = dailyAverageAmount
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+
+                    Modes.MONTHLY -> {
+                    // TODO: Implement monthly view
+                    Text(
+                        text = "Monthly view coming soon",
+                        color = Color.Gray
+                    )
+            }
+        }
 
                 if (showExpenseModal) {
                     ExpenseModal(
