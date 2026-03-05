@@ -4,6 +4,8 @@ import app.cash.turbine.test
 import com.ahanam05.galleon.data.aggregator.ExpenseAggregator
 import com.ahanam05.galleon.data.models.Expense
 import com.ahanam05.galleon.data.repository.ExpenseRepository
+import com.ahanam05.galleon.getMonthEndDate
+import com.ahanam05.galleon.getMonthStartDate
 import com.ahanam05.galleon.getWeekEndDate
 import com.ahanam05.galleon.getWeekStartDate
 import com.google.firebase.auth.FirebaseAuth
@@ -18,6 +20,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.*
+import java.util.Calendar
 
 @ExperimentalCoroutinesApi
 class HomeViewModelTest {
@@ -365,6 +368,218 @@ class HomeViewModelTest {
 
         viewModel.weeklyTotal.test {
             assertEquals(15.0, awaitItem(), 0.01)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun init_initializesMonthBoundariesCorrectly() = runTest {
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(emptyList()))
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+
+        val currentTimeMillis = System.currentTimeMillis()
+        val expectedMonthStart = getMonthStartDate(currentTimeMillis)
+        val expectedMonthEnd = getMonthEndDate(currentTimeMillis)
+        viewModel.monthStartDate.test {
+            val monthStart = awaitItem()
+            assertEquals(expectedMonthStart, monthStart)
+            cancelAndIgnoreRemainingEvents()
+        }
+        viewModel.monthEndDate.test {
+            val monthEnd = awaitItem()
+            assertEquals(expectedMonthEnd, monthEnd)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun monthlyTotal_calculatesCorrectlyForMonthExpenses() = runTest {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.FEBRUARY, 1, 0, 0, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val monthStart = calendar.timeInMillis
+        val expensesInMonth = listOf(
+            Expense(id = "1", title = "Groceries", amount = 100.0, category = "Food", date = monthStart + 86400000),
+            Expense(id = "2", title = "Rent", amount = 1000.0, category = "Housing", date = monthStart + 172800000),
+            Expense(id = "3", title = "Utilities", amount = 150.0, category = "Bills", date = monthStart + 259200000)
+        )
+        calendar.add(Calendar.MONTH, 1)
+        val nextMonthExpense = Expense(id = "4", title = "Coffee", amount = 5.0, category = "Food", date = calendar.timeInMillis)
+        val allExpenses = expensesInMonth + nextMonthExpense
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(allExpenses))
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+        viewModel.updateSelectedDate(monthStart)
+        advanceUntilIdle()
+
+        viewModel.monthlyTotal.test {
+            val total = awaitItem()
+            assertEquals(1250.0, total, 0.01)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun monthlyComparison_showsIncreaseCorrectly() = runTest {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.FEBRUARY, 15)
+        val currentDate = calendar.timeInMillis
+        val currentMonthStart = getMonthStartDate(currentDate)
+        calendar.add(Calendar.MONTH, -1)
+        val previousMonthStart = getMonthStartDate(calendar.timeInMillis)
+        val expenses = listOf(
+            Expense(id = "1", title = "Current", amount = 1200.0, category = "Food", date = currentMonthStart + 86400000),
+            Expense(id = "2", title = "Previous", amount = 1000.0, category = "Food", date = previousMonthStart + 86400000)
+        )
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(expenses))
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+        viewModel.updateSelectedDate(currentDate)
+        advanceUntilIdle()
+
+        viewModel.monthlyComparison.test {
+            val comparison = awaitItem()
+            assertEquals("20% more than last month", comparison.first)
+            assertEquals(true, comparison.second)
+            assertEquals(true, comparison.third)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun monthlyComparison_showsDecreaseCorrectly() = runTest {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.MARCH, 15)
+        val currentDate = calendar.timeInMillis
+        val currentMonthStart = getMonthStartDate(currentDate)
+        calendar.add(Calendar.MONTH, -1)
+        val previousMonthStart = getMonthStartDate(calendar.timeInMillis)
+        val expenses = listOf(
+            Expense(id = "1", title = "Current", amount = 800.0, category = "Food", date = currentMonthStart + 86400000),
+            Expense(id = "2", title = "Previous", amount = 1000.0, category = "Food", date = previousMonthStart + 86400000)
+        )
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(expenses))
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+        viewModel.updateSelectedDate(currentDate)
+        advanceUntilIdle()
+
+        viewModel.monthlyComparison.test {
+            val comparison = awaitItem()
+            assertEquals("20% less than last month", comparison.first)
+            assertEquals(false, comparison.second)
+            assertEquals(true, comparison.third)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun monthlyComparison_hidesWhenCurrentMonthIsZero() = runTest {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.MARCH, 15)
+        val currentDate = calendar.timeInMillis
+        calendar.add(Calendar.MONTH, -1)
+        val previousMonthStart = getMonthStartDate(calendar.timeInMillis)
+        val expenses = listOf(
+            Expense(id = "1", title = "Previous", amount = 1000.0, category = "Food", date = previousMonthStart + 86400000)
+        )
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(expenses))
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+        viewModel.updateSelectedDate(currentDate)
+        advanceUntilIdle()
+
+        viewModel.monthlyComparison.test {
+            val comparison = awaitItem()
+            assertEquals(false, comparison.third)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun monthlyComparison_hidesWhenPreviousMonthIsZero() = runTest {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.MARCH, 15)
+        val currentDate = calendar.timeInMillis
+        val currentMonthStart = getMonthStartDate(currentDate)
+        val expenses = listOf(
+            Expense(id = "1", title = "Current", amount = 1000.0, category = "Food", date = currentMonthStart + 86400000)
+        )
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(expenses))
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+        viewModel.updateSelectedDate(currentDate)
+        advanceUntilIdle()
+
+        viewModel.monthlyComparison.test {
+            val comparison = awaitItem()
+            assertEquals(false, comparison.third)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun monthlyComparison_hidesWhenChangeLessThanOnePercent() = runTest {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.MARCH, 15)
+        val currentDate = calendar.timeInMillis
+        val currentMonthStart = getMonthStartDate(currentDate)
+        calendar.add(Calendar.MONTH, -1)
+        val previousMonthStart = getMonthStartDate(calendar.timeInMillis)
+        val expenses = listOf(
+            Expense(id = "1", title = "Current", amount = 1004.0, category = "Food", date = currentMonthStart + 86400000),
+            Expense(id = "2", title = "Previous", amount = 1000.0, category = "Food", date = previousMonthStart + 86400000)
+        )
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(expenses))
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+        viewModel.updateSelectedDate(currentDate)
+        advanceUntilIdle()
+
+        viewModel.monthlyComparison.test {
+            val comparison = awaitItem()
+            assertEquals(false, comparison.third)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun addExpense_recomputesMonthlyAggregates() = runTest {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.MARCH, 15)
+        val currentDate = calendar.timeInMillis
+        val currentMonthStart = getMonthStartDate(currentDate)
+        val initialExpenses = listOf(
+            Expense(id = "1", title = "Groceries", amount = 100.0, category = "Food", date = currentMonthStart + 86400000)
+        )
+        val expensesFlow = MutableStateFlow(initialExpenses)
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(expensesFlow)
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+        viewModel.updateSelectedDate(currentDate)
+        advanceUntilIdle()
+        viewModel.monthlyTotal.test {
+            assertEquals(100.0, awaitItem(), 0.01)
+            cancelAndIgnoreRemainingEvents()
+        }
+        val newExpense = Expense(id = "2", title = "Rent", amount = 1000.0, category = "Housing", date = currentMonthStart + 172800000)
+        val updatedExpenses = initialExpenses + newExpense
+
+        viewModel.addExpense("Rent", "Housing", "1000.0", currentMonthStart + 172800000)
+        advanceUntilIdle()
+        expensesFlow.value = updatedExpenses
+        advanceUntilIdle()
+
+        viewModel.monthlyTotal.test {
+            assertEquals(1100.0, awaitItem(), 0.01)
             cancelAndIgnoreRemainingEvents()
         }
     }

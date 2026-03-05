@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.ahanam05.galleon.data.aggregator.ExpenseAggregator
 import com.ahanam05.galleon.data.models.Expense
 import com.ahanam05.galleon.data.repository.ExpenseRepository
+import com.ahanam05.galleon.getMonthEndDate
+import com.ahanam05.galleon.getMonthStartDate
 import com.ahanam05.galleon.getWeekEndDate
 import com.ahanam05.galleon.getWeekStartDate
 import com.google.firebase.auth.FirebaseAuth
@@ -44,12 +46,25 @@ class HomeViewModel @Inject constructor(
     private val _topCategory = MutableStateFlow<Pair<String, Double>?>(null)
     val topCategory: StateFlow<Pair<String, Double>?> = _topCategory.asStateFlow()
 
+    private val _monthStartDate = MutableStateFlow<Long>(getMonthStartDate(Calendar.getInstance().timeInMillis))
+    val monthStartDate: StateFlow<Long> = _monthStartDate.asStateFlow()
+
+    private val _monthEndDate = MutableStateFlow<Long>(getMonthEndDate(Calendar.getInstance().timeInMillis))
+    val monthEndDate: StateFlow<Long> = _monthEndDate.asStateFlow()
+
+    private val _monthlyTotal = MutableStateFlow<Double>(0.0)
+    val monthlyTotal: StateFlow<Double> = _monthlyTotal.asStateFlow()
+
+    private val _monthlyComparison = MutableStateFlow<Triple<String, Boolean, Boolean>>(Triple("", false, false))
+    val monthlyComparison: StateFlow<Triple<String, Boolean, Boolean>> = _monthlyComparison.asStateFlow()
+
     init {
         auth.currentUser?.uid?.let { userId ->
             viewModelScope.launch {
                 expenseRepository.getAllExpenses(userId).collect { expenseList ->
                     _expenses.value = expenseList
                     recomputeWeeklyAggregates()
+                    recomputeMonthlyAggregates()
                 }
             }
         }
@@ -103,15 +118,21 @@ class HomeViewModel @Inject constructor(
     fun updateSelectedDate(newDate: Long) {
         val newWeekStart = getWeekStartDate(newDate)
         val newWeekEnd = getWeekEndDate(newDate)
+        val newMonthStart = getMonthStartDate(newDate)
+        val newMonthEnd = getMonthEndDate(newDate)
 
         _weekStartDate.value = newWeekStart
         _weekEndDate.value = newWeekEnd
+        _monthStartDate.value = newMonthStart
+        _monthEndDate.value = newMonthEnd
 
         recomputeWeeklyAggregates()
+        recomputeMonthlyAggregates()
     }
 
     fun updateSelectedTab(newTab: String) {
         recomputeWeeklyAggregates()
+        recomputeMonthlyAggregates()
     }
 
     private fun recomputeWeeklyAggregates() {
@@ -136,5 +157,32 @@ class HomeViewModel @Inject constructor(
         val topCategory = ExpenseAggregator.getTopCategoryByExpense(currentExpenses, weekStart, weekEnd)
         _topCategory.value = topCategory
 
+    }
+
+    private fun recomputeMonthlyAggregates() {
+        val currentExpenses = _expenses.value
+        val monthStart = _monthStartDate.value
+        val monthEnd = _monthEndDate.value
+
+        val currentTotal = ExpenseAggregator.getMonthlyTotal(
+            currentExpenses,
+            monthStart,
+            monthEnd
+        )
+        _monthlyTotal.value = currentTotal
+
+        val calendar = Calendar.getInstance().apply { timeInMillis = monthStart }
+        calendar.add(Calendar.MONTH, -1)
+        val previousMonthStart = getMonthStartDate(calendar.timeInMillis)
+        val previousMonthEnd = getMonthEndDate(calendar.timeInMillis)
+
+        val previousTotal = ExpenseAggregator.getMonthlyTotal(
+            currentExpenses,
+            previousMonthStart,
+            previousMonthEnd
+        )
+
+        val comparison = ExpenseAggregator.getMonthlyComparison(currentTotal, previousTotal)
+        _monthlyComparison.value = comparison
     }
 }
