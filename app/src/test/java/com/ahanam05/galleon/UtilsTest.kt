@@ -260,4 +260,136 @@ class UtilsTest {
         assertEquals(result1, result2)
         assertEquals("February 2025", result1)
     }
+
+    @Test
+    fun getMonthStartDate_returnsFirstDayOfMonth() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.FEBRUARY, 15, 10, 30, 45)
+        calendar.set(Calendar.MILLISECOND, 123)
+
+        val result = Calendar.getInstance().apply { timeInMillis = getMonthStartDate(calendar.timeInMillis) }
+
+        assertEquals(1, result.get(Calendar.DAY_OF_MONTH))
+        assertEquals(0, result.get(Calendar.HOUR_OF_DAY))
+        assertEquals(0, result.get(Calendar.MINUTE))
+        assertEquals(0, result.get(Calendar.SECOND))
+        assertEquals(0, result.get(Calendar.MILLISECOND))
+    }
+
+    @Test
+    fun getMonthEndDate_returnsLastDayOfMonth() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.FEBRUARY, 15, 10, 30, 45)
+
+        val result = Calendar.getInstance().apply { timeInMillis = getMonthEndDate(calendar.timeInMillis) }
+
+        assertEquals(28, result.get(Calendar.DAY_OF_MONTH)) // February 2025 has 28 days
+        assertEquals(23, result.get(Calendar.HOUR_OF_DAY))
+        assertEquals(59, result.get(Calendar.MINUTE))
+        assertEquals(59, result.get(Calendar.SECOND))
+    }
+
+    @Test
+    fun getMonthStartDate_whenAlreadyFirstDay_returnsSameDay() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.MARCH, 1, 0, 0, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+
+        val result = Calendar.getInstance().apply { timeInMillis = getMonthStartDate(calendar.timeInMillis) }
+
+        assertEquals(1, result.get(Calendar.DAY_OF_MONTH))
+        assertEquals(0, result.get(Calendar.HOUR_OF_DAY))
+        assertEquals(0, result.get(Calendar.MINUTE))
+        assertEquals(0, result.get(Calendar.SECOND))
+    }
+
+    @Test
+    fun getMonthEndDate_whenAlreadyLastDay_returnsSameDay() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.MARCH, 31, 23, 59, 59)
+
+        val result = Calendar.getInstance().apply { timeInMillis = getMonthEndDate(calendar.timeInMillis) }
+
+        assertEquals(31, result.get(Calendar.DAY_OF_MONTH))
+        assertEquals(23, result.get(Calendar.HOUR_OF_DAY))
+        assertEquals(59, result.get(Calendar.MINUTE))
+        assertEquals(59, result.get(Calendar.SECOND))
+    }
+
+    @Test
+    fun getMonthStartDate_handlesLeapYear() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2024, Calendar.FEBRUARY, 15)
+
+        val result = Calendar.getInstance().apply { timeInMillis = getMonthStartDate(calendar.timeInMillis) }
+
+        assertEquals(1, result.get(Calendar.DAY_OF_MONTH))
+        assertEquals(Calendar.FEBRUARY, result.get(Calendar.MONTH))
+        assertEquals(2024, result.get(Calendar.YEAR))
+    }
+
+    @Test
+    fun getMonthEndDate_handlesLeapYear() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2024, Calendar.FEBRUARY, 15)
+
+        val result = Calendar.getInstance().apply { timeInMillis = getMonthEndDate(calendar.timeInMillis) }
+
+        assertEquals(29, result.get(Calendar.DAY_OF_MONTH)) // February 2024 has 29 days (leap year)
+    }
+
+    @Test
+    fun getMonthStartDate_handlesDecember() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.DECEMBER, 25)
+
+        val result = Calendar.getInstance().apply { timeInMillis = getMonthStartDate(calendar.timeInMillis) }
+
+        assertEquals(1, result.get(Calendar.DAY_OF_MONTH))
+        assertEquals(Calendar.DECEMBER, result.get(Calendar.MONTH))
+        assertEquals(2025, result.get(Calendar.YEAR))
+    }
+
+    @Test
+    fun getMonthEndDate_handlesDecember() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.DECEMBER, 15)
+
+        val result = Calendar.getInstance().apply { timeInMillis = getMonthEndDate(calendar.timeInMillis) }
+
+        assertEquals(31, result.get(Calendar.DAY_OF_MONTH))
+        assertEquals(Calendar.DECEMBER, result.get(Calendar.MONTH))
+    }
+
+    @Test
+    fun getMonthStartDate_handlesJanuary() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.JANUARY, 15)
+
+        val result = Calendar.getInstance().apply { timeInMillis = getMonthStartDate(calendar.timeInMillis) }
+
+        assertEquals(1, result.get(Calendar.DAY_OF_MONTH))
+        assertEquals(Calendar.JANUARY, result.get(Calendar.MONTH))
+    }
+
+    @Test
+    fun getMonthEndDate_handlesJanuary() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.JANUARY, 15)
+
+        val result = Calendar.getInstance().apply { timeInMillis = getMonthEndDate(calendar.timeInMillis) }
+
+        assertEquals(31, result.get(Calendar.DAY_OF_MONTH))
+        assertEquals(Calendar.JANUARY, result.get(Calendar.MONTH))
+    }
+
+    @Test
+    fun getMonthStartDate_handles30DayMonth() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.APRIL, 15)
+
+        val result = Calendar.getInstance().apply { timeInMillis = getMonthEndDate(calendar.timeInMillis) }
+
+        assertEquals(30, result.get(Calendar.DAY_OF_MONTH))
+    }
 }
