@@ -179,4 +179,113 @@ class ExpenseAggregatorTest {
         assertEquals(2, result.size)
         assertEquals(30.0, result.sumOf { it.amount }, 0.01)
     }
+
+    @Test
+    fun getMonthlyTotal_withExpensesInMonth_returnsSum() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.FEBRUARY, 1)
+        val monthStart = calendar.apply {
+            set(Calendar.DAY_OF_MONTH, 1)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        val monthEnd = calendar.timeInMillis
+        val expenses = listOf(
+            createExpense("Expense 1", 100.0, monthStart + 86400000),
+            createExpense("Expense 2", 200.0, monthStart + 172800000),
+            createExpense("Expense 3", 300.0, monthStart + 259200000)
+        )
+
+        val result = ExpenseAggregator.getMonthlyTotal(expenses, monthStart, monthEnd)
+
+        assertEquals(600.0, result, 0.01)
+    }
+
+    @Test
+    fun getMonthlyTotal_withNoExpenses_returnsZero() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.MARCH, 1, 0, 0, 0)
+        val monthStart = calendar.timeInMillis
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        val monthEnd = calendar.timeInMillis
+
+        val result = ExpenseAggregator.getMonthlyTotal(emptyList(), monthStart, monthEnd)
+
+        assertEquals(0.0, result, 0.01)
+    }
+
+    @Test
+    fun getMonthlyComparison_withIncrease_returnsCorrectText() {
+        val result = ExpenseAggregator.getMonthlyComparison(1200.0, 1000.0)
+
+        assertEquals("20% more than last month", result.first)
+        assertEquals(true, result.second)
+        assertEquals(true, result.third)
+    }
+
+    @Test
+    fun getMonthlyComparison_withDecrease_returnsCorrectText() {
+        val result = ExpenseAggregator.getMonthlyComparison(800.0, 1000.0)
+
+        assertEquals("20% less than last month", result.first)
+        assertEquals(false, result.second)
+        assertEquals(true, result.third)
+    }
+
+    @Test
+    fun getMonthlyComparison_withZeroCurrentMonth_shouldNotShow() {
+        val result = ExpenseAggregator.getMonthlyComparison(0.0, 1000.0)
+
+        assertEquals(false, result.third)
+    }
+
+    @Test
+    fun getMonthlyComparison_withZeroPreviousMonth_shouldNotShow() {
+        val result = ExpenseAggregator.getMonthlyComparison(1000.0, 0.0)
+
+        assertEquals(false, result.third)
+    }
+
+    @Test
+    fun getMonthlyComparison_roundsPercentageCorrectly() {
+        val result = ExpenseAggregator.getMonthlyComparison(1125.0, 1000.0)
+
+        assertEquals("12% more than last month", result.first)
+    }
+
+    @Test
+    fun getMonthlyComparison_withChangeLessThanOnePercent_shouldNotShow() {
+        val result = ExpenseAggregator.getMonthlyComparison(1004.0, 1000.0)
+
+        assertEquals(false, result.third)
+    }
+
+    @Test
+    fun getMonthlyComparison_withChangeExactlyOnePercent_shouldShow() {
+        val result = ExpenseAggregator.getMonthlyComparison(1010.0, 1000.0)
+
+        assertEquals("1% more than last month", result.first)
+        assertEquals(true, result.second)
+        assertEquals(true, result.third)
+    }
+
+    @Test
+    fun getMonthlyComparison_withNegativeChangeLessThanOnePercent_shouldNotShow() {
+        val result = ExpenseAggregator.getMonthlyComparison(996.0, 1000.0)
+
+        assertEquals(false, result.third)
+    }
+
+    @Test
+    fun getMonthlyComparison_withZeroPointFivePercentChange_shouldNotShow() {
+        val result = ExpenseAggregator.getMonthlyComparison(1005.0, 1000.0)
+
+        assertEquals(false, result.third)
+    }
 }

@@ -156,4 +156,56 @@ object ExpenseAggregator {
     fun getWeeklyChartData(breakdown: Map<String, Double>): List<Double> {
         return breakdown.values.toList()
     }
+
+    /**
+     * Get the total spending for a given month.
+     * @param expenses List of all expenses
+     * @param monthStartMillis Start of month (1st day, 00:00:00)
+     * @param monthEndMillis End of month (last day, 23:59:59)
+     * @return Total amount spent in the month
+     */
+    fun getMonthlyTotal(
+        expenses: List<Expense>,
+        monthStartMillis: Long,
+        monthEndMillis: Long
+    ): Double {
+        return expenses
+            .filter { it.date in monthStartMillis..monthEndMillis }
+            .sumOf { it.amount }
+    }
+
+    /**
+     * Get month-over-month comparison text and indicator.
+     * @param currentMonthTotal Total spending for current month
+     * @param previousMonthTotal Total spending for previous month
+     * @return Triple of (comparisonText, isIncrease, shouldShow)
+     *         - comparisonText: e.g., "12% less than last month"
+     *         - isIncrease: true if spending increased, false if decreased
+     *         - shouldShow: false if either month has no expenses
+     */
+    fun getMonthlyComparison(
+        currentMonthTotal: Double,
+        previousMonthTotal: Double
+    ): Triple<String, Boolean, Boolean> {
+        if (currentMonthTotal == 0.0 || previousMonthTotal == 0.0) {
+            return Triple("", false, false)
+        }
+
+        val percentageChange = ((currentMonthTotal - previousMonthTotal) / previousMonthTotal) * 100
+        val absoluteChange = kotlin.math.abs(round(percentageChange))
+
+        if (absoluteChange < 1.0) {
+            return Triple("", false, false)
+        }
+
+        val isIncrease = percentageChange > 0
+
+        val text = if (isIncrease) {
+            "${absoluteChange.toInt()}% more than last month"
+        } else {
+            "${absoluteChange.toInt()}% less than last month"
+        }
+
+        return Triple(text, isIncrease, true)
+    }
 }
