@@ -36,6 +36,7 @@ import com.ahanam05.galleon.formatMonth
 import com.ahanam05.galleon.formatWeekRange
 import com.ahanam05.galleon.getTotalAmount
 import com.ahanam05.galleon.home.components.DailyBreakdownChart
+import com.ahanam05.galleon.home.components.MonthlyExpenseCard
 import com.ahanam05.galleon.home.components.NoExpensesFound
 
 object Modes{
@@ -56,6 +57,8 @@ fun HomeScreen(onSignOutClick: () -> Unit,
     val weekStartDate by viewModel.weekStartDate.collectAsState()
     val weekEndDate by viewModel.weekEndDate.collectAsState()
     val topCategory by viewModel.topCategory.collectAsState()
+    val monthlyTotal by viewModel.monthlyTotal.collectAsState()
+    val monthlyComparison by viewModel.monthlyComparison.collectAsState()
 
     val MutedGold = Color(0xFFDDAA44)
     var selectedTab by remember { mutableStateOf(Modes.DAILY) }
@@ -230,12 +233,15 @@ fun HomeScreen(onSignOutClick: () -> Unit,
                     }
 
                     Modes.MONTHLY -> {
-                    // TODO: Implement monthly view
-                    Text(
-                        text = "Monthly view coming soon",
-                        color = Color.Gray
-                    )
-            }
+                        MonthlyExpenseCard(
+                            monthlyTotal = monthlyTotal,
+                            comparisonText = monthlyComparison.first,
+                            isIncrease = monthlyComparison.second,
+                            shouldShowComparison = monthlyComparison.third
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
         }
 
                 if (showExpenseModal) {
