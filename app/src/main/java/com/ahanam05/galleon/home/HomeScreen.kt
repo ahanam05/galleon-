@@ -89,13 +89,21 @@ fun HomeScreen(onSignOutClick: () -> Unit,
 
     val incrementDate: () -> Unit = {
         val calendar = Calendar.getInstance().apply { timeInMillis = selectedDate }
-        calendar.add(Calendar.DAY_OF_YEAR, 1)
+        when (selectedTab) {
+            Modes.DAILY -> calendar.add(Calendar.DAY_OF_YEAR, 1)
+            Modes.WEEKLY -> calendar.add(Calendar.WEEK_OF_YEAR, 1)
+            Modes.MONTHLY -> calendar.add(Calendar.MONTH, 1)
+        }
         selectedDate = calendar.timeInMillis
     }
 
     val decrementDate: () -> Unit = {
         val calendar = Calendar.getInstance().apply { timeInMillis = selectedDate }
-        calendar.add(Calendar.DAY_OF_YEAR, -1)
+        when (selectedTab) {
+            Modes.DAILY -> calendar.add(Calendar.DAY_OF_YEAR, -1)
+            Modes.WEEKLY -> calendar.add(Calendar.WEEK_OF_YEAR, -1)
+            Modes.MONTHLY -> calendar.add(Calendar.MONTH, -1)
+        }
         selectedDate = calendar.timeInMillis
     }
 
