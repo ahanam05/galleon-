@@ -76,3 +76,8 @@ fun formatWeekRange(startDateMillis: Long, endDateMillis: Long): String {
         "$startMonth $startDay - $endMonth $endDay"
     }
 }
+
+fun formatMonth(dateMillis: Long): String {
+    val formatter = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+    return formatter.format(Calendar.getInstance().apply { timeInMillis = dateMillis }.time)
+}

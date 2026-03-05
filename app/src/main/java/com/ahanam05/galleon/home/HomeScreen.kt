@@ -32,6 +32,7 @@ import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 import com.ahanam05.galleon.R
 import com.ahanam05.galleon.formatDate
+import com.ahanam05.galleon.formatMonth
 import com.ahanam05.galleon.formatWeekRange
 import com.ahanam05.galleon.getTotalAmount
 import com.ahanam05.galleon.home.components.DailyBreakdownChart
@@ -172,10 +173,10 @@ fun HomeScreen(onSignOutClick: () -> Unit,
                 Spacer(modifier = Modifier.height(20.dp))
 
                 DateNavigationRow(
-                    selectedDate = if (selectedTab == Modes.WEEKLY) {
-                        formatWeekRange(weekStartDate, weekEndDate)
-                    } else {
-                        formatDate(selectedDate)
+                    selectedDate = when (selectedTab) {
+                        Modes.WEEKLY -> formatWeekRange(weekStartDate, weekEndDate)
+                        Modes.MONTHLY -> formatMonth(selectedDate)
+                        else -> formatDate(selectedDate)
                     },
                     onPreviousDate = decrementDate,
                     onNextDate = incrementDate,

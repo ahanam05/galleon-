@@ -213,4 +213,51 @@ class UtilsTest {
         assertEquals(3, endCal.get(Calendar.DAY_OF_MONTH))
         assertEquals(Calendar.JANUARY, endCal.get(Calendar.MONTH))
     }
+
+    @Test
+    fun formatMonth_returnsCorrectlyFormattedString() {
+        val calendar = Calendar.getInstance(Locale.US)
+        calendar.set(2025, Calendar.MARCH, 15)
+        val timestamp = calendar.timeInMillis
+
+        val result = formatMonth(timestamp)
+
+        assertEquals("March 2025", result)
+    }
+
+    @Test
+    fun formatMonth_handlesDifferentMonths() {
+        val calendar = Calendar.getInstance(Locale.US)
+        calendar.set(2026, Calendar.DECEMBER, 1)
+        val timestamp = calendar.timeInMillis
+
+        val result = formatMonth(timestamp)
+
+        assertEquals("December 2026", result)
+    }
+
+    @Test
+    fun formatMonth_handlesYearBoundary() {
+        val calendar = Calendar.getInstance(Locale.US)
+        calendar.set(2025, Calendar.JANUARY, 1)
+        val timestamp = calendar.timeInMillis
+
+        val result = formatMonth(timestamp)
+
+        assertEquals("January 2025", result)
+    }
+
+    @Test
+    fun formatMonth_ignoresDayOfMonth() {
+        val calendar1 = Calendar.getInstance(Locale.US)
+        calendar1.set(2025, Calendar.FEBRUARY, 1)
+        val calendar2 = Calendar.getInstance(Locale.US)
+        calendar2.set(2025, Calendar.FEBRUARY, 28)
+
+        val result1 = formatMonth(calendar1.timeInMillis)
+        val result2 = formatMonth(calendar2.timeInMillis)
+
+        assertEquals(result1, result2)
+        assertEquals("February 2025", result1)
+    }
 }
