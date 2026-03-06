@@ -392,4 +392,98 @@ class UtilsTest {
 
         assertEquals(30, result.get(Calendar.DAY_OF_MONTH))
     }
+
+    @Test
+    fun getMonthYear_returnsCorrectlyFormattedString() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.JANUARY, 15)
+        val timestamp = calendar.timeInMillis
+
+        val result = getMonthYear(timestamp)
+
+        assertEquals("2025-01", result)
+    }
+
+    @Test
+    fun getMonthYear_handlesDoubleDigitMonth() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.DECEMBER, 25)
+        val timestamp = calendar.timeInMillis
+
+        val result = getMonthYear(timestamp)
+
+        assertEquals("2025-12", result)
+    }
+
+    @Test
+    fun getMonthYear_ignoresDayOfMonth() {
+        val calendar1 = Calendar.getInstance()
+        calendar1.set(2025, Calendar.MARCH, 1)
+        val calendar2 = Calendar.getInstance()
+        calendar2.set(2025, Calendar.MARCH, 31)
+
+        val result1 = getMonthYear(calendar1.timeInMillis)
+        val result2 = getMonthYear(calendar2.timeInMillis)
+
+        assertEquals(result1, result2)
+        assertEquals("2025-03", result1)
+    }
+
+    @Test
+    fun getMonthYear_handlesYearBoundary() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2026, Calendar.JANUARY, 1)
+        val timestamp = calendar.timeInMillis
+
+        val result = getMonthYear(timestamp)
+
+        assertEquals("2026-01", result)
+    }
+
+    @Test
+    fun getMonthYear_handlesFebruary() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.FEBRUARY, 15)
+        val timestamp = calendar.timeInMillis
+
+        val result = getMonthYear(timestamp)
+
+        assertEquals("2025-02", result)
+    }
+
+    @Test
+    fun getMonthYear_handlesLeapYear() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2024, Calendar.FEBRUARY, 29)
+        val timestamp = calendar.timeInMillis
+
+        val result = getMonthYear(timestamp)
+
+        assertEquals("2024-02", result)
+    }
+
+    @Test
+    fun getMonthYear_ignoresTimeOfDay() {
+        val calendar1 = Calendar.getInstance()
+        calendar1.set(2025, Calendar.APRIL, 15, 0, 0, 0)
+        val calendar2 = Calendar.getInstance()
+        calendar2.set(2025, Calendar.APRIL, 15, 23, 59, 59)
+
+        val result1 = getMonthYear(calendar1.timeInMillis)
+        val result2 = getMonthYear(calendar2.timeInMillis)
+
+        assertEquals(result1, result2)
+        assertEquals("2025-04", result1)
+    }
+
+    @Test
+    fun getMonthYear_handlesSeptember() {
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.SEPTEMBER, 10)
+        val timestamp = calendar.timeInMillis
+
+        val result = getMonthYear(timestamp)
+
+        assertEquals("2025-09", result)
+    }
 }

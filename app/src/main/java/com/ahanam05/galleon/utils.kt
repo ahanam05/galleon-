@@ -103,3 +103,18 @@ fun getMonthEndDate(dateMillis: Long): Long {
         set(Calendar.MILLISECOND, 999)
     }.timeInMillis
 }
+
+/**
+ * Format a timestamp to "YYYY-MM" format for Firestore budget document IDs.
+ * @param dateMillis The timestamp to format
+ * @return Formatted string like "2025-01" for January 2025
+ */
+fun getMonthYear(dateMillis: Long): String {
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = dateMillis
+
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH) + 1
+
+    return String.format("%d-%02d", year, month)
+}
