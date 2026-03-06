@@ -1,6 +1,7 @@
 package com.ahanam05.galleon.auth
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,11 +39,6 @@ fun LandingScreen(onSignInClick: () -> Unit) {
             modifier = Modifier
                 .size(160.dp)
                 .padding(bottom = 32.dp)
-                .shadow(
-                    elevation = 12.dp,
-                    shape = RoundedCornerShape(80.dp),
-                    spotColor = Color(0xFFFFB74D).copy(alpha = 0.3f)
-                )
         )
 
         Text(
@@ -79,16 +75,16 @@ fun LandingScreen(onSignInClick: () -> Unit) {
             )
         ) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFFF2F2F2)),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
                     painter = painterResource(id = drawable.siwg_button),
                     contentDescription = stringResource(id = string.sign_in_button_desc),
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .padding(horizontal = 20.dp, vertical = 12.dp)
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
