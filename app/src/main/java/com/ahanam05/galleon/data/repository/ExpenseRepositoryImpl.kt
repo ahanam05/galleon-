@@ -1,5 +1,6 @@
 package com.ahanam05.galleon.data.repository
 
+import com.ahanam05.galleon.data.models.Budget
 import com.ahanam05.galleon.data.models.Expense
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
@@ -12,6 +13,7 @@ class ExpenseRepositoryImpl @Inject constructor (private val db: FirebaseFiresto
 
     val USER_COLLECTION = "users"
     val EXPENSES_SUBCOLLECTION = "expenses"
+    val BUDGETS_SUBCOLLECTION = "budgets"
     val AMOUNT_FIELD = "amount"
     val CATEGORY_FIELD = "category"
     val DATE_FIELD = "date"
@@ -102,6 +104,34 @@ class ExpenseRepositoryImpl @Inject constructor (private val db: FirebaseFiresto
             return true
         } catch(e: Exception){
             return false
+        }
+    }
+
+    override suspend fun setMonthlyBudget(userId: String, monthYear: String, budget: Budget): Boolean {
+        return try {
+            db.collection(USER_COLLECTION)
+                .document(userId)
+                .collection(BUDGETS_SUBCOLLECTION)
+                .document(monthYear)
+                .set(budget)
+                .await()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun getMonthlyBudget(userId: String, monthYear: String): Budget? {
+        return try {
+            val doc = db.collection(USER_COLLECTION)
+                .document(userId)
+                .collection(BUDGETS_SUBCOLLECTION)
+                .document(monthYear)
+                .get()
+                .await()
+            doc.toObject(Budget::class.java)
+        } catch (e: Exception) {
+            null
         }
     }
 }

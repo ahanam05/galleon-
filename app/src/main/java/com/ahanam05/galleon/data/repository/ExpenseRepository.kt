@@ -1,5 +1,6 @@
 package com.ahanam05.galleon.data.repository
 
+import com.ahanam05.galleon.data.models.Budget
 import com.ahanam05.galleon.data.models.Expense
 import kotlinx.coroutines.flow.Flow
 
@@ -12,4 +13,6 @@ interface ExpenseRepository {
     suspend fun getExpenseById(userId: String, expenseId: String): Expense?
     suspend fun updateExpense(userId: String, expenseId: String, expense: Expense): String?
     suspend fun deleteExpense(userId: String, expenseId: String): Boolean
+    suspend fun setMonthlyBudget(userId: String, monthYear: String, budget: Budget): Boolean
+    suspend fun getMonthlyBudget(userId: String, monthYear: String): Budget?
 }
