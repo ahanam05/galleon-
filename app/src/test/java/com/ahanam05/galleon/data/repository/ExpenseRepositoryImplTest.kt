@@ -1,6 +1,7 @@
 package com.ahanam05.galleon.data.repository
 
 import app.cash.turbine.test
+import com.ahanam05.galleon.data.models.Budget
 import com.ahanam05.galleon.data.models.Expense
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.CollectionReference
@@ -10,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -30,6 +32,9 @@ class ExpenseRepositoryImplTest {
     private lateinit var userDocument: DocumentReference
     private lateinit var expensesCollection: CollectionReference
     private lateinit var expenseDocument: DocumentReference
+    private lateinit var budgetsCollection: CollectionReference
+    private lateinit var budgetDocument: DocumentReference
+
     private lateinit var repository: ExpenseRepositoryImpl
     private lateinit var mockListenerRegistration: ListenerRegistration
 
@@ -43,12 +48,16 @@ class ExpenseRepositoryImplTest {
         userDocument = mock()
         expensesCollection = mock()
         expenseDocument = mock()
+        budgetsCollection = mock()
+        budgetDocument = mock()
         mockListenerRegistration = mock()
 
         whenever(firestore.collection("users")).thenReturn(usersCollection)
         whenever(usersCollection.document(any())).thenReturn(userDocument)
         whenever(userDocument.collection("expenses")).thenReturn(expensesCollection)
         whenever(expensesCollection.document(any())).thenReturn(expenseDocument)
+        whenever(userDocument.collection("budgets")).thenReturn(budgetsCollection)
+        whenever(budgetsCollection.document(any())).thenReturn(budgetDocument)
 
         repository = ExpenseRepositoryImpl(firestore)
     }
@@ -169,5 +178,100 @@ class ExpenseRepositoryImplTest {
         val result = repository.deleteExpense(testUserId, testExpenseId)
 
         assertFalse(result)
+    }
+
+    @Test
+    fun setMonthlyBudget_returnsTrueOnSuccessfulSet() = runTest {
+        val budget = Budget(monthlyBudget = 30000.0, monthYear = "2025-01")
+        val setTask = Tasks.forResult<Void>(null)
+        whenever(budgetDocument.set(budget)).thenReturn(setTask)
+
+        val result = repository.setMonthlyBudget(testUserId, "2025-01", budget)
+
+        verify(firestore).collection("users")
+        verify(usersCollection).document(testUserId)
+        verify(userDocument).collection("budgets")
+        verify(budgetsCollection).document("2025-01")
+        verify(budgetDocument).set(budget)
+        assertTrue(result)
+    }
+
+    @Test
+    fun setMonthlyBudget_callsFirestoreWithCorrectData() = runTest {
+        val budget = Budget(monthlyBudget = 50000.0, monthYear = "2025-02")
+        val setTask = Tasks.forResult<Void>(null)
+        whenever(budgetDocument.set(budget)).thenReturn(setTask)
+
+        repository.setMonthlyBudget(testUserId, "2025-02", budget)
+
+        verify(budgetsCollection).document("2025-02")
+        verify(budgetDocument).set(budget)
+    }
+
+    @Test
+    fun setMonthlyBudget_returnsFalseOnFailure() = runTest {
+        val budget = Budget(monthlyBudget = 30000.0, monthYear = "2025-01")
+        val exception = Exception("Set failed")
+        val setTask = Tasks.forException<Void>(exception)
+        whenever(budgetDocument.set(budget)).thenReturn(setTask)
+
+        val result = repository.setMonthlyBudget(testUserId, "2025-01", budget)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun getMonthlyBudget_returnsBudgetWhenExists() = runTest {
+        val budget = Budget(monthlyBudget = 30000.0, monthYear = "2025-01")
+        val mockDocumentSnapshot = mock<DocumentSnapshot>()
+        val getTask = Tasks.forResult(mockDocumentSnapshot)
+        whenever(budgetDocument.get()).thenReturn(getTask)
+        whenever(mockDocumentSnapshot.toObject(Budget::class.java)).thenReturn(budget)
+
+        val result = repository.getMonthlyBudget(testUserId, "2025-01")
+
+        verify(firestore).collection("users")
+        verify(usersCollection).document(testUserId)
+        verify(userDocument).collection("budgets")
+        verify(budgetsCollection).document("2025-01")
+        verify(budgetDocument).get()
+        assertEquals(30000.0, result?.monthlyBudget)
+        assertEquals("2025-01", result?.monthYear)
+    }
+
+    @Test
+    fun getMonthlyBudget_callsFirestoreWithCorrectPath() = runTest {
+        val mockDocumentSnapshot = mock<DocumentSnapshot>()
+        val getTask = Tasks.forResult(mockDocumentSnapshot)
+        whenever(budgetDocument.get()).thenReturn(getTask)
+        whenever(mockDocumentSnapshot.toObject(Budget::class.java)).thenReturn(null)
+
+        repository.getMonthlyBudget(testUserId, "2025-03")
+
+        verify(budgetsCollection).document("2025-03")
+        verify(budgetDocument).get()
+    }
+
+    @Test
+    fun getMonthlyBudget_returnsNullWhenBudgetDoesNotExist() = runTest {
+        val mockDocumentSnapshot = mock<DocumentSnapshot>()
+        val getTask = Tasks.forResult(mockDocumentSnapshot)
+        whenever(budgetDocument.get()).thenReturn(getTask)
+        whenever(mockDocumentSnapshot.toObject(Budget::class.java)).thenReturn(null)
+
+        val result = repository.getMonthlyBudget(testUserId, "2025-01")
+
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun getMonthlyBudget_returnsNullOnFailure() = runTest {
+        val exception = Exception("Get failed")
+        val getTask = Tasks.forException<DocumentSnapshot>(exception)
+        whenever(budgetDocument.get()).thenReturn(getTask)
+
+        val result = repository.getMonthlyBudget(testUserId, "2025-01")
+
+        assertEquals(null, result)
     }
 }
