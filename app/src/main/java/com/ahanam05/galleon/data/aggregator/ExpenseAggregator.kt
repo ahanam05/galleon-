@@ -208,4 +208,32 @@ object ExpenseAggregator {
 
         return Triple(text, isIncrease, true)
     }
+
+    /**
+     * Calculate the percentage of budget spent.
+     * Returns null if percentage is less than 1% or if budget is 0.
+     * @param spent Total amount spent
+     * @param budget Monthly budget amount
+     * @return Percentage spent (0-100+) or null if < 1%
+     */
+    fun getBudgetPercentageSpent(spent: Double, budget: Double): Double? {
+        if (budget == 0.0) return null
+
+        val percentage = (spent / budget) * 100
+        val roundedPercentage = round(percentage)
+
+        return if (roundedPercentage < 1.0) null else roundedPercentage
+    }
+
+    /**
+     * Calculate remaining budget amount.
+     * Returns 0 if spent exceeds budget (never negative).
+     * @param spent Total amount spent
+     * @param budget Monthly budget amount
+     * @return Remaining budget (non-negative)
+     */
+    fun getRemainingBudget(spent: Double, budget: Double): Double {
+        val remaining = budget - spent
+        return if (remaining < 0.0) 0.0 else remaining
+    }
 }

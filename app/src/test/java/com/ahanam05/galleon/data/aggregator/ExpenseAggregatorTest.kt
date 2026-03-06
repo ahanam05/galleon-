@@ -288,4 +288,154 @@ class ExpenseAggregatorTest {
 
         assertEquals(false, result.third)
     }
+
+    @Test
+    fun getBudgetPercentageSpent_returnsCorrectPercentage() {
+        val spent = 500.0
+        val budget = 1000.0
+
+        val result = ExpenseAggregator.getBudgetPercentageSpent(spent, budget)
+
+        assertEquals(50.0, result)
+    }
+
+    @Test
+    fun getBudgetPercentageSpent_roundsToNearestInteger() {
+        val spent = 337.0
+        val budget = 1000.0
+
+        val result = ExpenseAggregator.getBudgetPercentageSpent(spent, budget)
+
+        assertEquals(34.0, result)
+    }
+
+    @Test
+    fun getBudgetPercentageSpent_returnsNullWhenLessThanOnePercent() {
+        val spent = 5.0
+        val budget = 1000.0
+
+        val result = ExpenseAggregator.getBudgetPercentageSpent(spent, budget)
+
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun getBudgetPercentageSpent_returnsNullWhenZeroBudget() {
+        val spent = 500.0
+        val budget = 0.0
+
+        val result = ExpenseAggregator.getBudgetPercentageSpent(spent, budget)
+
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun getBudgetPercentageSpent_handlesOverBudget() {
+        val spent = 1500.0
+        val budget = 1000.0
+
+        val result = ExpenseAggregator.getBudgetPercentageSpent(spent, budget)
+
+        assertEquals(150.0, result)
+    }
+
+    @Test
+    fun getBudgetPercentageSpent_handlesZeroSpent() {
+        val spent = 0.0
+        val budget = 1000.0
+
+        val result = ExpenseAggregator.getBudgetPercentageSpent(spent, budget)
+
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun getBudgetPercentageSpent_handlesExactlyOnePercent() {
+        val spent = 10.0
+        val budget = 1000.0
+
+        val result = ExpenseAggregator.getBudgetPercentageSpent(spent, budget)
+
+        assertEquals(1.0, result)
+    }
+
+    @Test
+    fun getBudgetPercentageSpent_handles99Point9Percent() {
+        val spent = 999.0
+        val budget = 1000.0
+
+        val result = ExpenseAggregator.getBudgetPercentageSpent(spent, budget)
+
+        assertEquals(100.0, result)
+    }
+
+    @Test
+    fun getRemainingBudget_returnsCorrectAmount() {
+        val spent = 300.0
+        val budget = 1000.0
+
+        val result = ExpenseAggregator.getRemainingBudget(spent, budget)
+
+        assertEquals(700.0, result, 0.001)
+    }
+
+    @Test
+    fun getRemainingBudget_returnsZeroWhenOverBudget() {
+        val spent = 1500.0
+        val budget = 1000.0
+
+        val result = ExpenseAggregator.getRemainingBudget(spent, budget)
+
+        assertEquals(0.0, result, 0.001)
+    }
+
+    @Test
+    fun getRemainingBudget_returnsZeroWhenExactlyAtBudget() {
+        val spent = 1000.0
+        val budget = 1000.0
+
+        val result = ExpenseAggregator.getRemainingBudget(spent, budget)
+
+        assertEquals(0.0, result, 0.001)
+    }
+
+    @Test
+    fun getRemainingBudget_handlesFractionalAmounts() {
+        val spent = 537.25
+        val budget = 1000.0
+
+        val result = ExpenseAggregator.getRemainingBudget(spent, budget)
+
+        assertEquals(462.75, result, 0.001)
+    }
+
+    @Test
+    fun getRemainingBudget_handlesZeroSpent() {
+        val spent = 0.0
+        val budget = 1000.0
+
+        val result = ExpenseAggregator.getRemainingBudget(spent, budget)
+
+        assertEquals(1000.0, result, 0.001)
+    }
+
+    @Test
+    fun getRemainingBudget_handlesZeroBudget() {
+        val spent = 500.0
+        val budget = 0.0
+
+        val result = ExpenseAggregator.getRemainingBudget(spent, budget)
+
+        assertEquals(0.0, result, 0.001)
+    }
+
+    @Test
+    fun getRemainingBudget_handlesSlightlyOverBudget() {
+        val spent = 1000.01
+        val budget = 1000.0
+
+        val result = ExpenseAggregator.getRemainingBudget(spent, budget)
+
+        assertEquals(0.0, result, 0.001)
+    }
 }
