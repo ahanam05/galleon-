@@ -2,6 +2,7 @@ package com.ahanam05.galleon.home
 
 import app.cash.turbine.test
 import com.ahanam05.galleon.data.aggregator.ExpenseAggregator
+import com.ahanam05.galleon.data.models.Budget
 import com.ahanam05.galleon.data.models.Expense
 import com.ahanam05.galleon.data.repository.ExpenseRepository
 import com.ahanam05.galleon.getMonthEndDate
@@ -582,5 +583,85 @@ class HomeViewModelTest {
             assertEquals(1100.0, awaitItem(), 0.01)
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun setMonthlyBudget_callsRepositoryCorrectly() = runTest {
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(emptyList()))
+        val testBudget = Budget(monthYear = "2025-03", monthlyBudget = 15000.0)
+        whenever(mockExpenseRepository.setMonthlyBudget(any(), any(), any())).thenReturn(true)
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.MARCH, 15)
+        viewModel.updateSelectedDate(calendar.timeInMillis)
+        advanceUntilIdle()
+
+        viewModel.setMonthlyBudget(testBudget.monthYear, testBudget)
+        advanceUntilIdle()
+
+        verify(mockExpenseRepository).setMonthlyBudget(
+            eq(testUserId),
+            eq("2025-03"),
+            any()
+        )
+    }
+
+    @Test
+    fun fetchMonthlyBudget_retrievesBudgetFromRepository() = runTest {
+        val testBudget = Budget(monthYear = "2025-03", monthlyBudget = 15000.0)
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(emptyList()))
+        whenever(mockExpenseRepository.getMonthlyBudget(testUserId, "2025-03")).thenReturn(testBudget)
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+
+        val calendar = Calendar.getInstance()
+        calendar.set(2025, Calendar.MARCH, 15)
+        viewModel.updateSelectedDate(calendar.timeInMillis)
+        advanceUntilIdle()
+
+        viewModel.monthlyBudget.test {
+            val budget = awaitItem()
+            assertEquals(testBudget, budget)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun fetchMonthlyBudget_handlesNullBudget() = runTest {
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(emptyList()))
+        whenever(mockExpenseRepository.getMonthlyBudget(eq(testUserId), any())).thenReturn(null)
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+
+        viewModel.monthlyBudget.test {
+            val budget = awaitItem()
+            assertEquals(null, budget)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun updateSelectedDate_fetchesBudgetForNewMonth() = runTest {
+        val marchBudget = Budget(monthYear = "2025-03", monthlyBudget = 15000.0)
+        val aprilBudget = Budget(monthYear = "2025-04", monthlyBudget = 18000.0)
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(emptyList()))
+        whenever(mockExpenseRepository.getMonthlyBudget(testUserId, "2025-03")).thenReturn(marchBudget)
+        whenever(mockExpenseRepository.getMonthlyBudget(testUserId, "2025-04")).thenReturn(aprilBudget)
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+
+        val marchCal = Calendar.getInstance()
+        marchCal.set(2025, Calendar.MARCH, 15)
+        viewModel.updateSelectedDate(marchCal.timeInMillis)
+        advanceUntilIdle()
+        val aprilCal = Calendar.getInstance()
+        aprilCal.set(2025, Calendar.APRIL, 15)
+        viewModel.updateSelectedDate(aprilCal.timeInMillis)
+        advanceUntilIdle()
+
+        verify(mockExpenseRepository).getMonthlyBudget(testUserId, "2025-03")
+        verify(mockExpenseRepository).getMonthlyBudget(testUserId, "2025-04")
     }
 }

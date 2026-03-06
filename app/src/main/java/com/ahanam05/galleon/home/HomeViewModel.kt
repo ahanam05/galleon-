@@ -4,10 +4,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahanam05.galleon.data.aggregator.ExpenseAggregator
+import com.ahanam05.galleon.data.models.Budget
 import com.ahanam05.galleon.data.models.Expense
 import com.ahanam05.galleon.data.repository.ExpenseRepository
 import com.ahanam05.galleon.getMonthEndDate
 import com.ahanam05.galleon.getMonthStartDate
+import com.ahanam05.galleon.getMonthYear
 import com.ahanam05.galleon.getWeekEndDate
 import com.ahanam05.galleon.getWeekStartDate
 import com.google.firebase.auth.FirebaseAuth
@@ -58,6 +60,9 @@ class HomeViewModel @Inject constructor(
     private val _monthlyComparison = MutableStateFlow<Triple<String, Boolean, Boolean>>(Triple("", false, false))
     val monthlyComparison: StateFlow<Triple<String, Boolean, Boolean>> = _monthlyComparison.asStateFlow()
 
+    private val _monthlyBudget = MutableStateFlow<Budget?>(null)
+    val monthlyBudget: StateFlow<Budget?> = _monthlyBudget.asStateFlow()
+
     init {
         auth.currentUser?.uid?.let { userId ->
             viewModelScope.launch {
@@ -66,6 +71,10 @@ class HomeViewModel @Inject constructor(
                     recomputeWeeklyAggregates()
                     recomputeMonthlyAggregates()
                 }
+            }
+
+            viewModelScope.launch {
+                getMonthlyBudget(Calendar.getInstance().timeInMillis)
             }
         }
     }
@@ -128,11 +137,34 @@ class HomeViewModel @Inject constructor(
 
         recomputeWeeklyAggregates()
         recomputeMonthlyAggregates()
+
+        viewModelScope.launch {
+            getMonthlyBudget(newDate)
+        }
     }
 
     fun updateSelectedTab(newTab: String) {
         recomputeWeeklyAggregates()
         recomputeMonthlyAggregates()
+    }
+
+    fun setMonthlyBudget(monthYear: String, budget: Budget) {
+        val userId = auth.currentUser?.uid ?: return
+
+        viewModelScope.launch {
+            val success = expenseRepository.setMonthlyBudget(userId, monthYear, budget)
+            if (success) {
+                _monthlyBudget.value = budget
+            }
+        }
+    }
+
+    private suspend fun getMonthlyBudget(dateMillis: Long) {
+        val userId = auth.currentUser?.uid ?: return
+        val monthYear = getMonthYear(dateMillis)
+
+        val budget = expenseRepository.getMonthlyBudget(userId, monthYear)
+        _monthlyBudget.value = budget
     }
 
     private fun recomputeWeeklyAggregates() {
