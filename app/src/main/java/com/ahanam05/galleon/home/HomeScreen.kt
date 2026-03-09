@@ -3,15 +3,16 @@ package com.ahanam05.galleon.home
 import android.util.Log
 import java.util.Calendar
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -55,6 +56,7 @@ fun HomeScreen(onSignOutClick: () -> Unit,
                user: FirebaseUser?,
                viewModel: HomeViewModel = hiltViewModel()) {
     val expenses by viewModel.expenses.collectAsState()
+    val isLoading by  viewModel.isLoading.collectAsState()
 
     val weeklyTotal by viewModel.weeklyTotal.collectAsState()
     val dailyBreakdownByDay by viewModel.dailyBreakdownByDay.collectAsState()
@@ -75,6 +77,7 @@ fun HomeScreen(onSignOutClick: () -> Unit,
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(selectedDate) {
         viewModel.updateSelectedDate(selectedDate)
@@ -158,144 +161,163 @@ fun HomeScreen(onSignOutClick: () -> Unit,
         Scaffold(
             containerColor = Color(0xFFF9F7F0),
             floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { showExpenseModal = true},
-                    containerColor = MutedGold,
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .size(60.dp)
-                        .shadow(12.dp, CircleShape)
-                ) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = stringResource(id = R.string.add_desc),
-                        tint = Color(0xFF2D2D2D),
-                        modifier = Modifier.size(24.dp)
-                    )
+                if(!isLoading){
+                    FloatingActionButton(
+                        onClick = { showExpenseModal = true},
+                        containerColor = MutedGold,
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .size(60.dp)
+                            .shadow(12.dp, CircleShape)
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = stringResource(id = R.string.add_desc),
+                            tint = Color(0xFF2D2D2D),
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
         ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                TopBar(
-                    user = user,
-                    onProfileClick = {
-                        scope.launch {
-                            drawerState.open()
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MutedGold,
+                        strokeWidth = 4.dp
+                    )
+                }
+                return@Scaffold
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .verticalScroll(scrollState)
+                ) {
+                    TopBar(
+                        user = user,
+                        onProfileClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
                         }
-                    }
-                )
+                    )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                TimePeriodTabs(
-                    selectedTab = selectedTab,
-                    onTabSelected = { selectedTab = it }
-                )
+                    TimePeriodTabs(
+                        selectedTab = selectedTab,
+                        onTabSelected = { selectedTab = it }
+                    )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                DateNavigationRow(
-                    selectedDate = when (selectedTab) {
-                        Modes.WEEKLY -> formatWeekRange(weekStartDate, weekEndDate)
-                        Modes.MONTHLY -> formatMonth(selectedDate)
-                        else -> formatDate(selectedDate)
-                    },
-                    onPreviousDate = decrementDate,
-                    onNextDate = incrementDate,
-                    onShowDatePicker = { showDatePicker = true }
-                )
+                    DateNavigationRow(
+                        selectedDate = when (selectedTab) {
+                            Modes.WEEKLY -> formatWeekRange(weekStartDate, weekEndDate)
+                            Modes.MONTHLY -> formatMonth(selectedDate)
+                            else -> formatDate(selectedDate)
+                        },
+                        onPreviousDate = decrementDate,
+                        onNextDate = incrementDate,
+                        onShowDatePicker = { showDatePicker = true }
+                    )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                BudgetStatusCard(
-                    monthlyTotal = monthlyTotal,
-                    budget = monthlyBudget,
-                    percentageSpent = ExpenseAggregator.getBudgetPercentageSpent(
-                        monthlyTotal,
-                        monthlyBudget?.monthlyBudget ?: 0.0),
-                    remainingAmount = ExpenseAggregator.getRemainingBudget(
-                        monthlyTotal,
-                        monthlyBudget?.monthlyBudget ?: 0.0
-                    ),
-                    formattedMonth = formatMonth(selectedDate),
-                    onClick = { showBudgetDialog = true },
-                )
+                    BudgetStatusCard(
+                        monthlyTotal = monthlyTotal,
+                        budget = monthlyBudget,
+                        percentageSpent = ExpenseAggregator.getBudgetPercentageSpent(
+                            monthlyTotal,
+                            monthlyBudget?.monthlyBudget ?: 0.0),
+                        remainingAmount = ExpenseAggregator.getRemainingBudget(
+                            monthlyTotal,
+                            monthlyBudget?.monthlyBudget ?: 0.0
+                        ),
+                        formattedMonth = formatMonth(selectedDate),
+                        onClick = { showBudgetDialog = true },
+                    )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                // Conditional rendering based on selected tab
-                when (selectedTab) {
-                    Modes.DAILY -> {
-                        Text(
-                            text = "Total: ₹$totalForDay",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF2D2D2D),
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
+                    // Conditional rendering based on selected tab
+                    when (selectedTab) {
+                        Modes.DAILY -> {
+                            Text(
+                                text = "Total: ₹$totalForDay",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF2D2D2D),
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                        if (filteredExpenses.isEmpty()) {
-                            NoExpensesFound()
-                        } else {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 16.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                items(filteredExpenses) { expense ->
-                                    ExpenseCard(
-                                        expense = expense,
-                                        viewModel = viewModel
-                                    )
+                            if (filteredExpenses.isEmpty()) {
+                                NoExpensesFound()
+                            } else {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    filteredExpenses.forEach { expense ->
+                                        ExpenseCard(
+                                            expense = expense,
+                                            viewModel = viewModel
+                                        )
+                                    }
                                 }
                             }
                         }
+
+                        Modes.WEEKLY -> {
+                            DailyBreakdownChart(
+                                dailyBreakdown = dailyBreakdownByDay,
+                                weekStartDate = weekStartDate,
+                                weeklyTotal = weeklyTotal,
+                                topCategory = topCategory,
+                                dailyAverage = dailyAverageAmount
+                            )
+
+                            Spacer(modifier = Modifier.height(24.dp))
+                        }
+
+                        Modes.MONTHLY -> {
+                            MonthlyExpenseCard(
+                                monthlyTotal = monthlyTotal,
+                                comparisonText = monthlyComparison.first,
+                                isIncrease = monthlyComparison.second,
+                                shouldShowComparison = monthlyComparison.third
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
                     }
 
-                    Modes.WEEKLY -> {
-                        DailyBreakdownChart(
-                            dailyBreakdown = dailyBreakdownByDay,
-                            weekStartDate = weekStartDate,
-                            weeklyTotal = weeklyTotal,
-                            topCategory = topCategory,
-                            dailyAverage = dailyAverageAmount
+                    if (showExpenseModal) {
+                        ExpenseModal(
+                            onDismiss = { showExpenseModal = false },
+                            onSave = { expense, name, category, date, amount ->
+                                Log.d("Add Expense", "Name: $name, Category: $category, Date: $date, Amount: ₹$amount")
+                                viewModel.addExpense(name, category, amount, date)
+                                showExpenseModal = false
+                            },
+                            onDelete = {},
+                            title = stringResource(id = R.string.add_expense_text),
+                            existingExpense = null,
+                            selectedDate = selectedDate
                         )
-
-                        Spacer(modifier = Modifier.height(24.dp))
                     }
-
-                    Modes.MONTHLY -> {
-                        MonthlyExpenseCard(
-                            monthlyTotal = monthlyTotal,
-                            comparisonText = monthlyComparison.first,
-                            isIncrease = monthlyComparison.second,
-                            shouldShowComparison = monthlyComparison.third
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-        }
-
-                if (showExpenseModal) {
-                    ExpenseModal(
-                        onDismiss = { showExpenseModal = false },
-                        onSave = { expense, name, category, date, amount ->
-                            Log.d("Add Expense", "Name: $name, Category: $category, Date: $date, Amount: ₹$amount")
-                            viewModel.addExpense(name, category, amount, date)
-                            showExpenseModal = false
-                        },
-                        onDelete = {},
-                        title = stringResource(id = R.string.add_expense_text),
-                        existingExpense = null,
-                        selectedDate = selectedDate
-                    )
                 }
             }
         }

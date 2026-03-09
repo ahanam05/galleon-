@@ -27,6 +27,9 @@ class HomeViewModel @Inject constructor(
     private val auth: FirebaseAuth
 ) : ViewModel() {
 
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     private val _expenses = MutableStateFlow<List<Expense>>(emptyList())
     val expenses: MutableStateFlow<List<Expense>> = _expenses
 
@@ -68,6 +71,7 @@ class HomeViewModel @Inject constructor(
             viewModelScope.launch {
                 expenseRepository.getAllExpenses(userId).collect { expenseList ->
                     _expenses.value = expenseList
+                    _isLoading.value = false
                     recomputeWeeklyAggregates()
                     recomputeMonthlyAggregates()
                 }

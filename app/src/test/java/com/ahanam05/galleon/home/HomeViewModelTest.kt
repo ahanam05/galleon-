@@ -816,4 +816,35 @@ class HomeViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test
+    fun init_startsWithLoadingTrue() = runTest {
+        val expensesFlow = MutableStateFlow<List<Expense>>(emptyList())
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(expensesFlow)
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+
+        viewModel.isLoading.test {
+            assertEquals(true, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun init_setsLoadingFalseAfterExpensesLoaded() = runTest {
+        val expensesFlow = MutableStateFlow<List<Expense>>(emptyList())
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(expensesFlow)
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+
+        viewModel.isLoading.test {
+            assertEquals(true, awaitItem())
+
+            expensesFlow.value = testExpenses
+            advanceUntilIdle()
+
+            assertEquals(false, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 }
