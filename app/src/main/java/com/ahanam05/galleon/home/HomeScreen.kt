@@ -27,6 +27,8 @@ import com.ahanam05.galleon.home.components.ExpenseCard
 import com.ahanam05.galleon.home.components.NavigationDrawerContent
 import com.ahanam05.galleon.home.components.TimePeriodTabs
 import com.ahanam05.galleon.home.components.TopBar
+import com.ahanam05.galleon.home.components.BudgetDialog
+import com.ahanam05.galleon.home.components.BudgetStatusCard
 import com.ahanam05.galleon.isSameDay
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
@@ -35,9 +37,12 @@ import com.ahanam05.galleon.formatDate
 import com.ahanam05.galleon.formatMonth
 import com.ahanam05.galleon.formatWeekRange
 import com.ahanam05.galleon.getTotalAmount
+import com.ahanam05.galleon.getMonthYear
+import com.ahanam05.galleon.data.models.Budget
 import com.ahanam05.galleon.home.components.DailyBreakdownChart
 import com.ahanam05.galleon.home.components.MonthlyExpenseCard
 import com.ahanam05.galleon.home.components.NoExpensesFound
+import com.ahanam05.galleon.data.aggregator.ExpenseAggregator
 
 object Modes{
     const val DAILY = "Daily"
@@ -59,12 +64,14 @@ fun HomeScreen(onSignOutClick: () -> Unit,
     val topCategory by viewModel.topCategory.collectAsState()
     val monthlyTotal by viewModel.monthlyTotal.collectAsState()
     val monthlyComparison by viewModel.monthlyComparison.collectAsState()
+    val monthlyBudget by viewModel.monthlyBudget.collectAsState()
 
     val MutedGold = Color(0xFFDDAA44)
     var selectedTab by remember { mutableStateOf(Modes.DAILY) }
     var selectedDate by remember { mutableLongStateOf(Calendar.getInstance().timeInMillis) }
     var showDatePicker by  remember { mutableStateOf(false)}
     var showExpenseModal by remember { mutableStateOf(false)}
+    var showBudgetDialog by remember { mutableStateOf(false) }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -87,6 +94,22 @@ fun HomeScreen(onSignOutClick: () -> Unit,
             },
             onDismiss = {
                 showDatePicker = false
+            }
+        )
+    }
+
+    if (showBudgetDialog) {
+        BudgetDialog(
+            formattedMonth = formatMonth(selectedDate),
+            existingBudget = monthlyBudget,
+            monthYear = getMonthYear(selectedDate),
+            onDismiss = { showBudgetDialog = false },
+            onSave = { budgetAmount ->
+                val monthYearKey = getMonthYear(selectedDate)
+                val budget = Budget(monthYear = monthYearKey, monthlyBudget = budgetAmount.monthlyBudget)
+                viewModel.setMonthlyBudget(monthYearKey, budget)
+                showBudgetDialog = false
+                viewModel.updateSelectedDate(selectedDate)
             }
         )
     }
@@ -184,6 +207,22 @@ fun HomeScreen(onSignOutClick: () -> Unit,
                     onPreviousDate = decrementDate,
                     onNextDate = incrementDate,
                     onShowDatePicker = { showDatePicker = true }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                BudgetStatusCard(
+                    monthlyTotal = monthlyTotal,
+                    budget = monthlyBudget,
+                    percentageSpent = ExpenseAggregator.getBudgetPercentageSpent(
+                        monthlyTotal,
+                        monthlyBudget?.monthlyBudget ?: 0.0),
+                    remainingAmount = ExpenseAggregator.getRemainingBudget(
+                        monthlyTotal,
+                        monthlyBudget?.monthlyBudget ?: 0.0
+                    ),
+                    formattedMonth = formatMonth(selectedDate),
+                    onClick = { showBudgetDialog = true },
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
