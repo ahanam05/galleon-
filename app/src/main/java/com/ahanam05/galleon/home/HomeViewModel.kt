@@ -186,7 +186,7 @@ class HomeViewModel @Inject constructor(
         val average = if (daysWithExpenses > 0) total / daysWithExpenses else 0.0
         _dailyAverageAmount.value = average
 
-        val topCategory = ExpenseAggregator.getTopCategoryByExpense(currentExpenses, weekStart, weekEnd)
+        val topCategory = ExpenseAggregator.getTopCategoryByExpense(weekExpenses, weekStart, weekEnd)
         _topCategory.value = topCategory
 
     }

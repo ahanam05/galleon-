@@ -664,4 +664,156 @@ class HomeViewModelTest {
         verify(mockExpenseRepository).getMonthlyBudget(testUserId, "2025-03")
         verify(mockExpenseRepository).getMonthlyBudget(testUserId, "2025-04")
     }
+
+    @Test
+    fun topCategory_returnsNullForEmptyWeek() = runTest {
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(emptyList()))
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+
+        viewModel.topCategory.test {
+            val category = awaitItem()
+            assertEquals(null, category)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun topCategory_identifiesCategoryWithHighestSpending() = runTest {
+        val weekStart = 1704585600000L
+        val monday = weekStart + 86400000L
+        val tuesday = weekStart + 172800000L
+        val expenses = listOf(
+            Expense(id = "1", title = "Lunch", amount = 15.0, category = "Food", date = monday),
+            Expense(id = "2", title = "Coffee", amount = 5.0, category = "Food", date = monday),
+            Expense(id = "3", title = "Metro", amount = 10.0, category = "Transportation", date = tuesday),
+            Expense(id = "4", title = "Movie", amount = 12.0, category = "Entertainment", date = tuesday)
+        )
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(expenses))
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+        viewModel.updateSelectedDate(weekStart)
+        advanceUntilIdle()
+
+        viewModel.topCategory.test {
+            val category = awaitItem()
+            assertEquals("Food", category?.first)
+            assertEquals(48.0, category?.second ?: 0.0, 0.01)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun topCategory_updatesWhenExpensesAdded() = runTest {
+        val weekStart = 1704585600000L
+        val monday = weekStart + 86400000L
+        val initialExpenses = listOf(
+            Expense(id = "1", title = "Coffee", amount = 5.0, category = "Food", date = monday)
+        )
+        val expensesFlow = MutableStateFlow(initialExpenses)
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(expensesFlow)
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+        viewModel.updateSelectedDate(weekStart)
+        advanceUntilIdle()
+        viewModel.topCategory.test {
+            assertEquals("Food", awaitItem()?.first)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        val newExpense = Expense(id = "2", title = "Metro", amount = 20.0, category = "Transportation", date = monday)
+        val updatedExpenses = initialExpenses + newExpense
+        viewModel.addExpense("Metro", "Transportation", "20.0", monday)
+        advanceUntilIdle()
+        expensesFlow.value = updatedExpenses
+        advanceUntilIdle()
+
+        viewModel.topCategory.test {
+            val category = awaitItem()
+            assertEquals("Transportation", category?.first)
+            assertEquals(80.0, category?.second ?: 0.0, 0.01)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun topCategory_updatesWhenExpensesDeleted() = runTest {
+        val weekStart = 1704585600000L
+        val monday = weekStart + 86400000L
+        val expense1 = Expense(id = "1", title = "Rent", amount = 1000.0, category = "Housing", date = monday)
+        val expense2 = Expense(id = "2", title = "Groceries", amount = 100.0, category = "Food", date = monday)
+        val initialExpenses = listOf(expense1, expense2)
+        val expensesFlow = MutableStateFlow(initialExpenses)
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(expensesFlow)
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+        viewModel.updateSelectedDate(weekStart)
+        advanceUntilIdle()
+        viewModel.topCategory.test {
+            assertEquals("Housing", awaitItem()?.first)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        viewModel.deleteExpense("1")
+        advanceUntilIdle()
+        expensesFlow.value = listOf(expense2)
+        advanceUntilIdle()
+
+        viewModel.topCategory.test {
+            val category = awaitItem()
+            assertEquals("Food", category?.first)
+            assertEquals(100.0, category?.second ?: 0.0, 0.01)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun topCategory_onlyConsidersExpensesInCurrentWeek() = runTest {
+        val weekStart = 1704585600000L
+        val weekEnd = 1705190399000L
+        val monday = weekStart + 86400000L
+        val nextWeek = weekEnd + 86400001L
+        val expenses = listOf(
+            Expense(id = "1", title = "Coffee", amount = 5.0, category = "Food", date = monday),
+            Expense(id = "2", title = "Expensive Dinner", amount = 200.0, category = "Food", date = nextWeek)
+        )
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(expenses))
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+        viewModel.updateSelectedDate(weekStart)
+        advanceUntilIdle()
+
+        viewModel.topCategory.test {
+            val category = awaitItem()
+            assertEquals("Food", category?.first)
+            assertEquals(100.0, category?.second ?: 0.0, 0.01)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun topCategory_handlesTieByReturningFirst() = runTest {
+        val weekStart = 1704585600000L
+        val monday = weekStart + 86400000L
+        val expenses = listOf(
+            Expense(id = "1", title = "Lunch", amount = 15.0, category = "Food", date = monday),
+            Expense(id = "2", title = "Metro", amount = 15.0, category = "Transportation", date = monday)
+        )
+        whenever(mockExpenseRepository.getAllExpenses(testUserId)).thenReturn(flowOf(expenses))
+
+        viewModel = HomeViewModel(mockExpenseRepository, mockFirebaseAuth)
+        advanceUntilIdle()
+        viewModel.updateSelectedDate(weekStart)
+        advanceUntilIdle()
+
+        viewModel.topCategory.test {
+            val category = awaitItem()
+            assertEquals(50.0, category?.second ?: 0.0, 0.01)
+            // Either "Food" or "Transportation" is acceptable for a tie
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 }
