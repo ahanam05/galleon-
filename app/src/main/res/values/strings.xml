@@ -33,4 +33,8 @@
     <string name="delete_dialog_text">Are you sure you want to delete this expense?</string>
     <string name="no_expenses_found">No expenses found</string>
     <string name="no_expenses_prompt">You haven\'t added any expenses for this day. Tap the + button to add your first record.</string>
+    <string name="set_budget_text">Set Budget</string>
+    <string name="view_budget_desc">View budget details</string>
+    <string name="budget_status_text">Budget Status</string>
+    <string name="budget_exhausted_text">Budget exhausted for this month</string>
 </resources>

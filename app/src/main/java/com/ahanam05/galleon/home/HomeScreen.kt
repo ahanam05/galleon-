@@ -233,6 +233,11 @@ fun HomeScreen(onSignOutClick: () -> Unit,
                     Spacer(modifier = Modifier.height(16.dp))
 
                     BudgetStatusCard(
+                        // BudgetStatusCard should be collapsed for Daily/Weekly views but expanded for Monthly
+                        isCollapsed = when (selectedTab) {
+                            Modes.MONTHLY -> false
+                            else -> true
+                        },
                         monthlyTotal = monthlyTotal,
                         budget = monthlyBudget,
                         percentageSpent = ExpenseAggregator.getBudgetPercentageSpent(
@@ -243,7 +248,7 @@ fun HomeScreen(onSignOutClick: () -> Unit,
                             monthlyBudget?.monthlyBudget ?: 0.0
                         ),
                         formattedMonth = formatMonth(selectedDate),
-                        onClick = { showBudgetDialog = true },
+                        onOpenDialog = { showBudgetDialog = true },
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
