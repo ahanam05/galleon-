@@ -486,4 +486,58 @@ class UtilsTest {
 
         assertEquals("2025-09", result)
     }
+
+    @Test
+    fun getDaysInMonth_january_returns31() {
+        val monthYear = "2025-01"
+
+        val result = getDaysInMonth(monthYear)
+
+        assertEquals(31, result)
+    }
+
+    @Test
+    fun getDaysInMonth_february_nonLeapYear_returns28() {
+        val monthYear = "2025-02"
+
+        val result = getDaysInMonth(monthYear)
+
+        assertEquals(28, result)
+    }
+
+    @Test
+    fun getDaysInMonth_february_leapYear_returns29() {
+        val monthYear = "2024-02"
+
+        val result = getDaysInMonth(monthYear)
+
+        assertEquals(29, result)
+    }
+
+    @Test
+    fun getDaysInMonth_century_notLeapYear_returns28() {
+        val monthYear = "1900-02"
+
+        val result = getDaysInMonth(monthYear)
+
+        assertEquals(28, result)
+    }
+
+    @Test
+    fun getDaysInMonth_century_leapYear_returns29() {
+        val monthYear = "2000-02"
+
+        val result = getDaysInMonth(monthYear)
+
+        assertEquals(29, result)
+    }
+
+    @Test
+    fun getDaysInMonth_april_returns30() {
+        val monthYear = "2025-04"
+
+        val result = getDaysInMonth(monthYear)
+
+        assertEquals(30, result)
+    }
 }

@@ -118,3 +118,14 @@ fun getMonthYear(dateMillis: Long): String {
 
     return String.format("%d-%02d", year, month)
 }
+
+fun getDaysInMonth(monthYear: String): Int {
+    val year = monthYear.substring(0, 4).toInt()
+    val month = monthYear.substring(5).toInt()
+
+    val calendar = Calendar.getInstance()
+    calendar.set(Calendar.YEAR, year)
+    calendar.set(Calendar.MONTH, month - 1)
+
+    return calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+}
