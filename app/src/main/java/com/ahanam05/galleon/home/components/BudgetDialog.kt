@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.ahanam05.galleon.data.models.Budget
+import com.ahanam05.galleon.getDaysInMonth
 
 @Composable
 fun BudgetDialog(
@@ -34,8 +35,8 @@ fun BudgetDialog(
     val BackgroundBeige = Color(0xFFF9F7F0)
     val DarkGray = Color(0xFF2D2D2D)
 
-    //TODO: Calculate daily limit based on the number of days in the month
-    val dailyLimit = budgetAmount.toDoubleOrNull()?.let { it / 30 } ?: 0.0
+    val daysInMonth = getDaysInMonth(monthYear)
+    val dailyLimit = budgetAmount.toDoubleOrNull()?.let { it / daysInMonth } ?: 0.0
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
