@@ -37,4 +37,16 @@
     <string name="view_budget_desc">View budget details</string>
     <string name="budget_status_text">Budget Status</string>
     <string name="budget_exhausted_text">Budget exhausted for this month</string>
+    <string name="total_weekly_expense_text">Total Weekly Expense</string>
+    <string name="no_expenses_yet">No expenses yet</string>
+    <string name="avg_day_text">Avg/Day</string>
+    <string name="set_monthly_budget">Set Monthly Budget</string>
+    <string name="edit_monthly_budget">Edit Monthly Budget</string>
+    <string name="plan_monthly_spending">Plan your spending for the upcoming month</string>
+    <string name="total_monthly_budget">Total Monthly Budget</string>
+    <string name="enter_valid_budget">Please enter a valid budget amount</string>
+    <string name="daily_spending_limit">Daily Spending Limit:</string>
+    <string name="save_budget">Save Budget</string>
+    <string name="total_monthly_expense">Total Monthly Expense</string>
+    <string name="close_desc">Close</string>
 </resources>

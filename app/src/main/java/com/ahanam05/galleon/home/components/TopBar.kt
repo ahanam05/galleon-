@@ -63,7 +63,7 @@ fun TopBar(user: FirebaseUser?, onProfileClick: () -> Unit) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = user?.displayName?.firstOrNull()?.uppercaseChar()?.toString() ?: "U",
+                        text = user?.displayName?.firstOrNull()?.uppercaseChar()?.toString() ?: stringResource(id = R.string.profile_img_placeholder),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF2D2D2D)

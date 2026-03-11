@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.ahanam05.galleon.data.models.Budget
 import com.ahanam05.galleon.getDaysInMonth
+import com.ahanam05.galleon.R
 
 @Composable
 fun BudgetDialog(
@@ -62,7 +64,7 @@ fun BudgetDialog(
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Close",
+                            contentDescription = stringResource(id = R.string.close_desc),
                             tint = DarkGray
                         )
                     }
@@ -77,7 +79,7 @@ fun BudgetDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "₹",
+                        text = stringResource(id = R.string.rupee_symbol),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = MutedGold
@@ -87,7 +89,7 @@ fun BudgetDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = if (existingBudget == null) "Set Monthly Budget" else "Edit Monthly Budget",
+                    text = if (existingBudget == null) stringResource(id = R.string.set_monthly_budget) else stringResource(id = R.string.edit_monthly_budget),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = DarkGray
@@ -96,7 +98,7 @@ fun BudgetDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Plan your spending for the upcoming month",
+                    text = stringResource(id = R.string.plan_monthly_spending),
                     fontSize = 14.sp,
                     color = DarkGray.copy(alpha = 0.6f),
                     textAlign = TextAlign.Center
@@ -106,7 +108,7 @@ fun BudgetDialog(
 
                 Column {
                     Text(
-                        text = "Total Monthly Budget",
+                        text = stringResource(id = R.string.total_monthly_budget),
                         fontSize = 14.sp,
                         color = DarkGray.copy(alpha = 0.6f),
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -121,7 +123,7 @@ fun BudgetDialog(
                         placeholder = { Text("0.00", color = DarkGray.copy(alpha = 0.3f)) },
                         leadingIcon = {
                             Text(
-                                text = "₹",
+                                text = stringResource(id = R.string.rupee_symbol),
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MutedGold
@@ -141,7 +143,7 @@ fun BudgetDialog(
 
                     if (showError) {
                         Text(
-                            text = "Please enter a valid budget amount",
+                            text = stringResource(id = R.string.enter_valid_budget),
                             fontSize = 12.sp,
                             color = Color.Red,
                             modifier = Modifier.padding(top = 4.dp)
@@ -160,7 +162,7 @@ fun BudgetDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Daily Spending Limit:",
+                        text = stringResource(id = R.string.daily_spending_limit),
                         fontSize = 14.sp,
                         color = DarkGray.copy(alpha = 0.6f)
                     )
@@ -193,7 +195,7 @@ fun BudgetDialog(
                         .height(50.dp)
                 ) {
                     Text(
-                        text = "Save Budget",
+                        text = stringResource(id = R.string.save_budget),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = DarkGray
@@ -207,20 +209,13 @@ fun BudgetDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Cancel",
+                        text = stringResource(id = R.string.cancel_text),
                         fontSize = 14.sp,
                         color = DarkGray.copy(alpha = 0.6f)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "GALLEON EXPENSE TRACKER",
-                    fontSize = 10.sp,
-                    color = DarkGray.copy(alpha = 0.3f),
-                    letterSpacing = 1.sp
-                )
             }
         }
     }

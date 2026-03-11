@@ -34,7 +34,6 @@ import com.ahanam05.galleon.R
 import com.ahanam05.galleon.data.models.Expense
 import com.ahanam05.galleon.home.HomeViewModel
 
-
 val ExpenseCardContainerColor = Color(0xFFFFFDF8)
 val CategoryTagColor = Color(0xFFEAE4D0)
 val MutedGold = Color(0xFFDDAA44)

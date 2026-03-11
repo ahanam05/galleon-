@@ -68,7 +68,7 @@ fun DailyBreakdownChart(
         ) {
             // Total Weekly Expense
             Text(
-                text = "Total Weekly Expense",
+                text = stringResource(id = R.string.total_weekly_expense_text),
                 fontSize = 14.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(bottom = 4.dp)
@@ -153,7 +153,7 @@ fun DailyBreakdownChart(
                     }
                 } else {
                     Text(
-                        text = "No expenses yet",
+                        text = stringResource(id = R.string.no_expenses_yet),
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
@@ -162,7 +162,7 @@ fun DailyBreakdownChart(
                 // Average/Day
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = "Avg/Day",
+                        text = stringResource(id = R.string.avg_day_text),
                         fontSize = 14.sp,
                         color = Color.Gray
                     )

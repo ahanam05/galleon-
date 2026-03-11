@@ -69,7 +69,6 @@ class MainActivity : ComponentActivity() {
     private fun launchCredentialManager() {
         val googleIdOption = GetGoogleIdOption.Builder()
             .setServerClientId(WEB_CLIENT_ID)
-            //.setNonce(generateSecureRandomNonce())
             .setFilterByAuthorizedAccounts(false)
             .build()
 
@@ -114,12 +113,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
     }
-
-//    fun generateSecureRandomNonce(byteLength: Int = 32): String {
-//    val randomBytes = ByteArray(byteLength)
-//    SecureRandom.getInstanceStrong().nextBytes(randomBytes)
-//    return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes)
-//}
 
     private fun signOut(navController: NavController) {
         auth.signOut()
